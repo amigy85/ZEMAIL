@@ -67,7 +67,7 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
       Campos: MANDT, TEMPLATE_ID CHAR30, SPRAS LANG, VERSAO NUMC4 (todos chave), ESTADO CHAR1 (R/A/O), SUBJECT STRING, CONTENT STRING, CHANGED_BY CHAR12, CHANGED_AT DEC15
       Regra: só 1 versão ESTADO='A' por TEMPLATE_ID+SPRAS (validar na gravação, não na BD)
 - [x] **T1.3** `docs/ddic/zemail_config.md` — Tabela `ZEMAIL_CONFIG`: PARAM CHAR30 (chave), VALOR CHAR100. Entradas iniciais: SENDER_ADDRESS, FALLBACK_LANGU='P', STRICT_MODE='X', BAL_OBJECT, PA0105_SUBTYPE='0010' — ⚠️ decisão pendente sobre BAL_OBJECT (ver nota no ficheiro)
-- [ ] **T1.4** `docs/ddic/zemail_estruturas.md` — Estruturas: `ZEMAIL_S_TEMPLATE` (id, spras, versao, subject, content, master_content), `ZEMAIL_S_RECIPIENT` (+tabela ZEMAIL_T_RECIPIENT; address, visible_name, type TO/CC/BCC), `ZEMAIL_S_PLACEHOLDER` (+tabela; name, value string, format CHAR1: ' '/D/C), `ZEMAIL_S_MESSAGE` (subject, body_html string, recipients, sender, attachments), `ZEMAIL_S_SEND_RESULT` (send_id, status, message)
+- [x] **T1.4** `docs/ddic/zemail_estruturas.md` — Estruturas: `ZEMAIL_S_TEMPLATE` (id, spras, versao, subject, content, master_content), `ZEMAIL_S_RECIPIENT` (+tabela ZEMAIL_T_RECIPIENT; address, visible_name, type TO/CC/BCC), `ZEMAIL_S_PLACEHOLDER` (+tabela; name, value string, format CHAR1: ' '/D/C), `ZEMAIL_S_MESSAGE` (subject, body_html string, recipients, sender, attachments), `ZEMAIL_S_SEND_RESULT` (send_id, status, message) — ⚠️ inclui também `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` (suporte a `attachments`, ver ficheiro)
 - [ ] **T1.5** `docs/msg/zemail_messages.md` — Classe de mensagens `ZEMAIL` (números, textos PT e variáveis &1..&4, mapeados às excepções da Fase 2)
 - [ ] **T1.6** `docs/import/IMPORT_CHECKLIST_FASE_1.md` + commit. **Gate:** utilizador cria os objectos em SE11/SE91 e confirma; Claude Code valida via MCP que existem no CBD antes de fechar a fase.
 
@@ -109,7 +109,7 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
       - CL_BCS + CL_DOCUMENT_BCS (HTM, string→soli_tab via cl_bcs_convert) + CL_CAM_ADDRESS_BCS
       - Anexos inline via ADD_ATTACHMENT com content-id (resolve o logo quebrado)
       - Remetente de ZEMAIL_CONFIG-SENDER_ADDRESS; SET_SEND_IMMEDIATELY( abap_false ); COMMIT delegado ao chamador
-      - Devolver send_request->send_request_id( )
+      - Devolver send_request->oid( ) TYPE sysuuid_x (corrigido T1.4: CL_BCS não tem método SEND_REQUEST_ID, confirmado via MCP)
 - [ ] **T3.7** `zcl_notification_service.clas.abap` implementa ZIF_EMAIL_SERVICE — fachada: engine → renderer → sender → logger; TRY/CATCH converte tudo em ZCX_EMAIL com contexto
 - [ ] **T3.8** `zcl_email_factory.clas.abap` — `create_notification_service( ) RETURNING zif_email_service` com composição por omissão (provider DB, sender BCS, logger BAL)
 - [ ] **T3.9** `IMPORT_CHECKLIST_FASE_3.md` + commit. **Gate:** activação no CBD + ABAP Unit verdes (resultado reportado pelo utilizador ou consultado via MCP se disponível).
