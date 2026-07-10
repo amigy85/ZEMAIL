@@ -69,7 +69,7 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
 - [x] **T1.3** `docs/ddic/zemail_config.md` — Tabela `ZEMAIL_CONFIG`: PARAM CHAR30 (chave), VALOR CHAR100. Entradas iniciais: SENDER_ADDRESS, FALLBACK_LANGU='P', STRICT_MODE='X', BAL_OBJECT='ZDEBIT_NOTE' (decisão confirmada 2026-07-10 — reutilizar objecto SLG0 existente), PA0105_SUBTYPE='0010'
 - [x] **T1.4** `docs/ddic/zemail_estruturas.md` — Estruturas: `ZEMAIL_S_TEMPLATE` (id, spras, versao, subject, content, master_content), `ZEMAIL_S_RECIPIENT` (+tabela ZEMAIL_T_RECIPIENT; address, visible_name, type TO/CC/BCC), `ZEMAIL_S_PLACEHOLDER` (+tabela; name, value string, format CHAR1: ' '/D/C), `ZEMAIL_S_MESSAGE` (subject, body_html string, recipients, sender — **sem `attachments`**, decisão confirmada 2026-07-10: `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` adiados para T3.5), `ZEMAIL_S_SEND_RESULT` (send_id, status, message)
 - [x] **T1.5** `docs/msg/zemail_messages.md` — Classe de mensagens `ZEMAIL` (números, textos PT e variáveis &1..&4, mapeados às excepções da Fase 2)
-- [ ] **T1.6** `docs/import/IMPORT_CHECKLIST_FASE_1.md` + commit. **Gate:** utilizador cria os objectos em SE11/SE91 e confirma; Claude Code valida via MCP que existem no CBD antes de fechar a fase.
+- [x] **T1.6** `docs/import/IMPORT_CHECKLIST_FASE_1.md` + commit. **Gate:** utilizador cria os objectos em SE11/SE91 e confirma; Claude Code valida via MCP que existem no CBD antes de fechar a fase.
 
 ## FASE 2 — Excepções e interfaces (ZEMAIL) → src/zemail/
 
