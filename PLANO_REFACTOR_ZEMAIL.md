@@ -63,7 +63,7 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
 
 - [x] **T1.1** `docs/ddic/zemail_tmpl.md` — Tabela `ZEMAIL_TMPL` (cabeçalho de template)
       Campos: MANDT (chave), TEMPLATE_ID CHAR30 (chave), MASTER_ID CHAR30, DESCRICAO CHAR60, CATEGORIA CHAR1, ACTIVO CHAR1
-- [ ] **T1.2** `docs/ddic/zemail_tmpl_cnt.md` — Tabela `ZEMAIL_TMPL_CNT` (conteúdo por idioma/versão)
+- [x] **T1.2** `docs/ddic/zemail_tmpl_cnt.md` — Tabela `ZEMAIL_TMPL_CNT` (conteúdo por idioma/versão)
       Campos: MANDT, TEMPLATE_ID CHAR30, SPRAS LANG, VERSAO NUMC4 (todos chave), ESTADO CHAR1 (R/A/O), SUBJECT STRING, CONTENT STRING, CHANGED_BY CHAR12, CHANGED_AT DEC15
       Regra: só 1 versão ESTADO='A' por TEMPLATE_ID+SPRAS (validar na gravação, não na BD)
 - [ ] **T1.3** `docs/ddic/zemail_config.md` — Tabela `ZEMAIL_CONFIG`: PARAM CHAR30 (chave), VALOR CHAR100. Entradas iniciais: SENDER_ADDRESS, FALLBACK_LANGU='P', STRICT_MODE='X', BAL_OBJECT, PA0105_SUBTYPE='0010'
