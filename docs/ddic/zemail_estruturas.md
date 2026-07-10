@@ -2,8 +2,10 @@
 
 > Especificação para criação manual em SE11 pelo utilizador. Claude Code não escreve DDIC no SAP.
 > Tarefa do plano: **T1.4** (Fase 1). Verificado via MCP (leitura) em 2026-07-10: sem colisão de nomes
-> `ZEMAIL*` no CBD. Elementos standard reutilizados (`AD_SMTPADR`, `AD_NAME1`, `W3CONTTYPE`, `SYSUUID_X`)
-> confirmados existentes via MCP; assinatura de `CL_BCS` confirmada via MCP (ver nota sobre `SEND_ID`).
+> `ZEMAIL*` no CBD. Elementos standard reutilizados (`AD_SMTPADR`, `AD_NAME1`, `SYSUUID_X`) confirmados
+> existentes via MCP; assinatura de `CL_BCS` confirmada via MCP (ver nota sobre `SEND_ID`). `ZEMAIL_S_ATTACHMENT`/
+> `ZEMAIL_T_ATTACHMENT` (e o elemento `W3CONTTYPE` que usariam) ficam fora desta fase — decisão do
+> utilizador, ver nota após "Ordem de criação recomendada".
 
 ## Ordem de criação recomendada
 
@@ -14,15 +16,16 @@ table types de outras estruturas:
 2. `ZEMAIL_S_TEMPLATE`
 3. `ZEMAIL_S_RECIPIENT` → `ZEMAIL_T_RECIPIENT`
 4. `ZEMAIL_S_PLACEHOLDER` → `ZEMAIL_T_PLACEHOLDER`
-5. `ZEMAIL_S_ATTACHMENT` → `ZEMAIL_T_ATTACHMENT` *(objecto de suporte, ver nota)*
-6. `ZEMAIL_S_MESSAGE` (usa `ZEMAIL_T_RECIPIENT` e `ZEMAIL_T_ATTACHMENT`)
-7. `ZEMAIL_S_SEND_RESULT`
+5. `ZEMAIL_S_MESSAGE` (usa `ZEMAIL_T_RECIPIENT`; sem `ATTACHMENTS` por agora — ver nota)
+6. `ZEMAIL_S_SEND_RESULT`
 
-> **Nota sobre âmbito:** o plano (T1.4) não nomeia explicitamente `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT`,
-> mas T3.5 (`ZCL_EMAIL_RENDERER`) já exige devolver "lista de anexos inline (content-id, xstring,
-> mimetype)" e T1.4 pede um campo `attachments` em `ZEMAIL_S_MESSAGE`. Estes dois objectos são o suporte
-> DDIC mínimo para essa lista — não introduzem funcionalidade além do já planeado, apenas o tipo de dados
-> que falta nomear. Sinalizado para confirmação, tal como a decisão pendente de T1.3.
+> **Decisão do utilizador (2026-07-10):** `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` — o suporte DDIC
+> para a lista de anexos inline que `ZCL_EMAIL_RENDERER` (T3.5) vai devolver — **não são criados nesta
+> fase**. O plano (T1.4) também não os nomeia explicitamente; ficam para serem especificados e criados
+> como sub-tarefa de T3.5, quando o `ZCL_EMAIL_RENDERER` for implementado. Consequência directa:
+> `ZEMAIL_S_MESSAGE` fica **sem o campo `ATTACHMENTS`** nesta fase (ver nota nessa secção) — mesmo o
+> plano pedindo esse campo em T1.4; o campo será acrescentado por `APPEND STRUCTURE`/edição em SE11
+> durante T3.5, com reactivação da estrutura nessa altura.
 
 ## Domínios / elementos de dados novos a criar
 
@@ -41,13 +44,12 @@ table types de outras estruturas:
 4. **`ZEMAIL_ESTADO_ENVIO`** — domínio `CHAR(1)`, **valores fixos**: `S` (Sucesso), `E` (Erro) — mesma
    convenção já usada para `ZASSIST_RUN-EMAIL_STATUS` (T5.1/T5.6), garantindo um único vocabulário de
    estado de envio em todo o projecto. Elemento de dados homónimo, rótulo "Estado Envio E-mail".
-5. **`ZEMAIL_CONTENT_ID`** — domínio `CHAR(40)`. Elemento de dados homónimo, rótulo "Content-ID Anexo"
-   (identificador usado na referência `cid:` dentro do HTML, resolvido por `ZCL_EMAIL_RENDERER`, T3.5).
 
 Reutilizar (standard, confirmados via MCP): `AD_SMTPADR` (endereço SMTP — já usado em
-`ZCL_DEBIT_NOTE_NOTIFICATION`/`ZCL_EMAIL_SERVICE`), `AD_NAME1` (nome de exibição — idem), `W3CONTTYPE`
-(tipo MIME, usado por `CL_MIME_REPOSITORY_API`), `SYSUUID_X` (identificador do pedido de envio BCS — ver
-nota sobre `SEND_ID`). `MANDT` não se aplica (estruturas, não tabelas).
+`ZCL_DEBIT_NOTE_NOTIFICATION`/`ZCL_EMAIL_SERVICE`), `AD_NAME1` (nome de exibição — idem), `SYSUUID_X`
+(identificador do pedido de envio BCS — ver nota sobre `SEND_ID`). `MANDT` não se aplica (estruturas, não
+tabelas). `W3CONTTYPE` (tipo MIME) fica reservado para quando `ZEMAIL_S_ATTACHMENT` for criado em T3.5 —
+não é necessário nesta fase.
 
 ## `ZEMAIL_S_TEMPLATE`
 
@@ -98,19 +100,6 @@ estrutura).
 não-única sobre `NAME` (documental — os consumidores, ex. `ZCL_PLACEHOLDER_SERVICE`, podem reindexar
 internamente em `HASHED TABLE` para performance de substituição).
 
-## `ZEMAIL_S_ATTACHMENT` + `ZEMAIL_T_ATTACHMENT` *(objecto de suporte — ver nota de âmbito acima)*
-
-Um anexo inline resolvido pelo `ZCL_EMAIL_RENDERER` (T3.5), referenciado no HTML via `cid:`.
-
-| Campo | Tipo | Elemento de dados / Domínio | Descrição |
-|---|---|---|---|
-| CONTENT_ID | CHAR40 | `ZEMAIL_CONTENT_ID` (novo) | Identificador usado em `cid:` no HTML (ex.: `logo_hcb`) |
-| CONTENT | RAWSTRING | tipo embutido `xstring` | Conteúdo binário do anexo |
-| MIMETYPE | CHAR128 | `W3CONTTYPE` (standard) | Tipo MIME (ex.: `image/png`) |
-
-**`ZEMAIL_T_ATTACHMENT`** — table type, linha `ZEMAIL_S_ATTACHMENT`, **Standard Table**, sem chave
-definida (iteração sequencial ao montar os anexos na mensagem BCS, T3.6).
-
 ## `ZEMAIL_S_MESSAGE`
 
 Mensagem totalmente montada (moldura + child + placeholders resolvidos), pronta para
@@ -122,7 +111,12 @@ Mensagem totalmente montada (moldura + child + placeholders resolvidos), pronta 
 | BODY_HTML | STRING | tipo embutido `string` | Corpo HTML final (moldura injectada), sem placeholders por resolver |
 | RECIPIENTS | `ZEMAIL_T_RECIPIENT` | table type (acima) | Lista de destinatários TO/CC/BCC |
 | SENDER | CHAR241 | `AD_SMTPADR` (standard) | Remetente; se vazio, `ZCL_EMAIL_SENDER_BCS` usa `ZEMAIL_CONFIG-SENDER_ADDRESS` (T1.3/T3.6) |
-| ATTACHMENTS | `ZEMAIL_T_ATTACHMENT` | table type (acima) | Anexos inline resolvidos (pode ser vazia) |
+
+> **`ATTACHMENTS` fica de fora nesta fase** (decisão do utilizador, 2026-07-10) — `ZEMAIL_S_ATTACHMENT`/
+> `ZEMAIL_T_ATTACHMENT` só serão especificados e criados em T3.5. Até lá, `ZEMAIL_S_MESSAGE` não suporta
+> anexos inline; `ZCL_EMAIL_SENDER_BCS` (T3.6) não deve assumir a existência deste campo enquanto T3.5 não
+> o acrescentar (via `APPEND STRUCTURE` em SE11 + reactivação). Registar esta dependência explicitamente
+> na tarefa T3.5 quando essa fase for iniciada.
 
 ## `ZEMAIL_S_SEND_RESULT`
 

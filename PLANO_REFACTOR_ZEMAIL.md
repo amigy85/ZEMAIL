@@ -66,8 +66,8 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
 - [x] **T1.2** `docs/ddic/zemail_tmpl_cnt.md` — Tabela `ZEMAIL_TMPL_CNT` (conteúdo por idioma/versão)
       Campos: MANDT, TEMPLATE_ID CHAR30, SPRAS LANG, VERSAO NUMC4 (todos chave), ESTADO CHAR1 (R/A/O), SUBJECT STRING, CONTENT STRING, CHANGED_BY CHAR12, CHANGED_AT DEC15
       Regra: só 1 versão ESTADO='A' por TEMPLATE_ID+SPRAS (validar na gravação, não na BD)
-- [x] **T1.3** `docs/ddic/zemail_config.md` — Tabela `ZEMAIL_CONFIG`: PARAM CHAR30 (chave), VALOR CHAR100. Entradas iniciais: SENDER_ADDRESS, FALLBACK_LANGU='P', STRICT_MODE='X', BAL_OBJECT, PA0105_SUBTYPE='0010' — ⚠️ decisão pendente sobre BAL_OBJECT (ver nota no ficheiro)
-- [x] **T1.4** `docs/ddic/zemail_estruturas.md` — Estruturas: `ZEMAIL_S_TEMPLATE` (id, spras, versao, subject, content, master_content), `ZEMAIL_S_RECIPIENT` (+tabela ZEMAIL_T_RECIPIENT; address, visible_name, type TO/CC/BCC), `ZEMAIL_S_PLACEHOLDER` (+tabela; name, value string, format CHAR1: ' '/D/C), `ZEMAIL_S_MESSAGE` (subject, body_html string, recipients, sender, attachments), `ZEMAIL_S_SEND_RESULT` (send_id, status, message) — ⚠️ inclui também `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` (suporte a `attachments`, ver ficheiro)
+- [x] **T1.3** `docs/ddic/zemail_config.md` — Tabela `ZEMAIL_CONFIG`: PARAM CHAR30 (chave), VALOR CHAR100. Entradas iniciais: SENDER_ADDRESS, FALLBACK_LANGU='P', STRICT_MODE='X', BAL_OBJECT='ZDEBIT_NOTE' (decisão confirmada 2026-07-10 — reutilizar objecto SLG0 existente), PA0105_SUBTYPE='0010'
+- [x] **T1.4** `docs/ddic/zemail_estruturas.md` — Estruturas: `ZEMAIL_S_TEMPLATE` (id, spras, versao, subject, content, master_content), `ZEMAIL_S_RECIPIENT` (+tabela ZEMAIL_T_RECIPIENT; address, visible_name, type TO/CC/BCC), `ZEMAIL_S_PLACEHOLDER` (+tabela; name, value string, format CHAR1: ' '/D/C), `ZEMAIL_S_MESSAGE` (subject, body_html string, recipients, sender — **sem `attachments`**, decisão confirmada 2026-07-10: `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` adiados para T3.5), `ZEMAIL_S_SEND_RESULT` (send_id, status, message)
 - [x] **T1.5** `docs/msg/zemail_messages.md` — Classe de mensagens `ZEMAIL` (números, textos PT e variáveis &1..&4, mapeados às excepções da Fase 2)
 - [ ] **T1.6** `docs/import/IMPORT_CHECKLIST_FASE_1.md` + commit. **Gate:** utilizador cria os objectos em SE11/SE91 e confirma; Claude Code valida via MCP que existem no CBD antes de fechar a fase.
 
@@ -104,6 +104,7 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
       - `build( iv_template_id, iv_langu, it_values, it_tables ) RETURNING zemail_s_message` (subject+body): injecta child em `{{BODY}}` do master, substitui placeholders no corpo E no assunto, valida unresolved
       - **Testes:** com provider double — master/child / só child / assunto com placeholder
 - [ ] **T3.5** `zcl_email_renderer.clas.abap`
+      - **Pré-requisito DDIC (adiado de T1.4 por decisão do utilizador, 2026-07-10):** especificar e obter criação em SE11 de `ZEMAIL_S_ATTACHMENT` (CONTENT_ID, CONTENT xstring, MIMETYPE) + `ZEMAIL_T_ATTACHMENT`, e acrescentar o campo `ATTACHMENTS TYPE ZEMAIL_T_ATTACHMENT` a `ZEMAIL_S_MESSAGE` via SE11 (append + reactivação) antes de implementar esta classe
       - Resolver imagens `cid:` : ler do MIME Repository (CL_MIME_REPOSITORY_API, caminho configurável; logo em /SAP/PUBLIC/ZHCB/logo_hcb.png) e devolver lista de anexos inline (content-id, xstring, mimetype)
 - [ ] **T3.6** `zcl_email_sender_bcs.clas.abap` implementa ZIF_EMAIL_SENDER
       - CL_BCS + CL_DOCUMENT_BCS (HTM, string→soli_tab via cl_bcs_convert) + CL_CAM_ADDRESS_BCS
