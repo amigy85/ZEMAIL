@@ -3,12 +3,14 @@
 > Tarefa **T3.9**. Ficheiros em `src/zemail/`, formato abapGit (mesmo padrão da Fase 2) — importar via
 > abapGit no CBD, pacote **`ZEMAIL`** (já existe desde a Fase 2). Claude Code não escreve nada no SAP.
 >
-> **Estado (2026-07-14): T3.1–T3.6 concluídos em Git; T3.7–T3.8 pendentes.** O bloqueio DDIC de T3.5
-> (`ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` + campo `ATTACHMENTS` em `ZEMAIL_S_MESSAGE`) foi resolvido:
-> objectos criados directamente no pacote `ZEMAIL` (ver `docs/ddic/zemail_s_attachment.md`), confirmados
-> via MCP antes de escrever T3.5/T3.6.
+> **Estado (2026-07-14): T3.1–T3.8 concluídos em Git — Fase 3 completa do lado do código.** O bloqueio
+> DDIC de T3.5 (`ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` + campo `ATTACHMENTS` em `ZEMAIL_S_MESSAGE`)
+> foi resolvido: objectos criados directamente no pacote `ZEMAIL`, confirmados via MCP antes de escrever
+> T3.5/T3.6. Falta apenas: registar `BAL_SUBOBJECT` novo em SLG0 (ver `docs/ddic/zemail_config.md`),
+> inserir os 6 registos de `ZEMAIL_CONFIG` (secção 5 do `IMPORT_CHECKLIST_FASE_1.md`), importar/activar
+> tudo via abapGit, e correr os ABAP Units.
 
-## Ordem de criação (dependências) — T3.1 a T3.4
+## Ordem de criação (dependências)
 
 | # | Ficheiro | Objecto | Depende de | Feito |
 |---|---|---|---|---|
@@ -20,6 +22,8 @@
 | 3.4 | `zcl_template_engine.clas.abap` + `.testclasses.abap` | `ZCL_TEMPLATE_ENGINE` | `ZIF_TEMPLATE_PROVIDER`, `ZCL_PLACEHOLDER_SERVICE` (3.3), `ZIF_EMAIL_SERVICE` (tipo `tt_table_placeholder`), `ZEMAIL_S_MESSAGE` | [ ] |
 | 3.5 | `zcl_email_renderer.clas.abap` | `ZCL_EMAIL_RENDERER` | `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` (novo, ver `docs/ddic/zemail_s_attachment.md`) + `ZCX_EMAIL_SEND` + `CL_MIME_REPOSITORY_API` (standard, confirmado via MCP) | [ ] |
 | 3.6 | `zcl_email_sender_bcs.clas.abap` | `ZCL_EMAIL_SENDER_BCS` | `ZIF_EMAIL_SENDER` (Fase 2) + `CL_BCS`, `CL_DOCUMENT_BCS`, `CL_CAM_ADDRESS_BCS`, `CL_BCS_CONVERT`, `CL_BCS_OBJHEAD` (standard, confirmados via MCP) | [ ] |
+| 3.7 | `zcl_notification_service.clas.abap` | `ZCL_NOTIFICATION_SERVICE` | `ZIF_EMAIL_SERVICE` (Fase 2) + `ZCL_TEMPLATE_ENGINE` (3.4), `ZCL_EMAIL_RENDERER` (3.5), `ZIF_EMAIL_SENDER`, `ZIF_LOGGER` | [ ] |
+| 3.8 | `zcl_email_factory.clas.abap` | `ZCL_EMAIL_FACTORY` | Todas as classes acima + `ZEMAIL_CONFIG` (Fase 1) + `ZIF_EMAIL_CONST` (grupo `config_param`, novo) | [ ] |
 
 ## Decisões tomadas nesta tarefa (fora do texto literal do plano)
 
@@ -47,13 +51,30 @@
    não está documentada nas assinaturas públicas de `CL_DOCUMENT_BCS`/`CL_BCS_OBJHEAD` — foi confirmada
    lendo a implementação interna real de `CL_DOCUMENT_BCS` via MCP (uso da constante `CP_CID` na
    construção de `CL_GBT_MULTIRELATED_SERVICE`), não escrita de memória.
+9. **T3.7 — `ZCL_NOTIFICATION_SERVICE`:** excepções que já são `ZCX_EMAIL` (`ZCX_TEMPLATE`,
+   `ZCX_EMAIL_SEND`) não são reembrulhadas — são só registadas em log e reenviadas tal qual (já satisfazem
+   `RAISING zcx_email` por herança). Só `CX_ROOT` genuinamente inesperado é convertido em
+   `zcx_email=>unexpected_error`. `IT_IMAGES` (logo HCB) é injectado no construtor, não fixo na classe.
+10. **T3.8 — `ZCL_EMAIL_FACTORY`:** único ponto do framework que lê `ZEMAIL_CONFIG` (1 `SELECT *`, sem
+    `SELECT` disperso). Acrescenta `BAL_SUBOBJECT` a `ZEMAIL_CONFIG` (não existia na lista original de
+    T1.3 — ver nota em `docs/ddic/zemail_config.md`) e um novo grupo `config_param` em `ZIF_EMAIL_CONST`
+    com os nomes dos 6 parâmetros, evitando literais soltos com os nomes dos parâmetros.
 
-## Confirmação e fecho do gate (T3.1–T3.6)
+## Confirmação e fecho do gate (T3.1–T3.8 — Fase 3 completa)
 
-- [ ] Utilizador importa `ZCL_LOGGER_BAL`, `ZIF_TEMPLATE_REPOSITORY`, `ZCL_TEMPLATE_REPOSITORY_DB`,
-      `ZCL_TEMPLATE_PROVIDER_DB`, `ZCL_PLACEHOLDER_SERVICE`, `ZCL_TEMPLATE_ENGINE`, `ZCL_EMAIL_RENDERER`,
-      `ZCL_EMAIL_SENDER_BCS` via abapGit (pacote `ZEMAIL`) e activa.
-- [ ] Utilizador corre ABAP Unit destas classes no CBD (T3.2/T3.3/T3.4 têm testes; T3.1/T3.5/T3.6 não,
-      ver plano).
-- [ ] Claude Code confirma via MCP que os 8 objectos existem em `ZEMAIL`.
-- [ ] T3.7–T3.9 continuam depois desta confirmação.
+- [ ] Registar `BAL_SUBOBJECT` = `EMAIL_SEND` como novo subobjecto SLG0 do objecto `ZDEBIT_NOTE` (não
+      coberto pelo gate original de Fase 1 — acção nova, ver `docs/ddic/zemail_config.md`).
+- [ ] Inserir os 6 registos de `ZEMAIL_CONFIG` via SM30 (secção 5 do `IMPORT_CHECKLIST_FASE_1.md`,
+      incluindo o novo `BAL_SUBOBJECT`).
+- [ ] Utilizador importa os 10 objectos (`ZCL_LOGGER_BAL`, `ZIF_TEMPLATE_REPOSITORY`,
+      `ZCL_TEMPLATE_REPOSITORY_DB`, `ZCL_TEMPLATE_PROVIDER_DB`, `ZCL_PLACEHOLDER_SERVICE`,
+      `ZCL_TEMPLATE_ENGINE`, `ZCL_EMAIL_RENDERER`, `ZCL_EMAIL_SENDER_BCS`, `ZCL_NOTIFICATION_SERVICE`,
+      `ZCL_EMAIL_FACTORY`) via abapGit (pacote `ZEMAIL`) e activa.
+- [ ] Utilizador corre ABAP Unit no CBD (T3.2/T3.3/T3.4 têm testes; T3.1/T3.5/T3.6/T3.7/T3.8 não, ver
+      plano).
+- [ ] Utilizador testa manualmente `zcl_email_factory=>create_notification_service( )->send( ... )` de
+      ponta a ponta (só possível depois dos registos de `ZEMAIL_CONFIG` acima existirem).
+- [ ] Claude Code confirma via MCP que os 10 objectos existem em `ZEMAIL`.
+- [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 3 como fechada, com a data de
+      confirmação do utilizador.
+- [ ] Fase 4 (templates e manutenção) pode então arrancar.

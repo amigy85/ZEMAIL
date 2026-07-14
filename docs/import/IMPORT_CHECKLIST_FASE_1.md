@@ -100,6 +100,7 @@ aqui por conveniência, já que a tabela estará activa nesta fase:
 | `FALLBACK_LANGU` | `P` | [ ] |
 | `STRICT_MODE` | `X` | [ ] |
 | `BAL_OBJECT` | `ZDEBIT_NOTE` | [ ] |
+| `BAL_SUBOBJECT` | `EMAIL_SEND` (novo, adicionado em T3.8 — requer registo em SLG0, ver `docs/ddic/zemail_config.md`) | [ ] |
 | `PA0105_SUBTYPE` | `0010` | [ ] |
 
 ## 6. Confirmação e fecho do gate

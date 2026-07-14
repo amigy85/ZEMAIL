@@ -51,6 +51,7 @@ nomenclatura em ABAP (constantes lidas em `ZIF_EMAIL_CONST`), não por domínio 
 | `FALLBACK_LANGU` | `P` | Código de idioma SAP de 1 carácter para Português (consistente com o domínio standard `SPRAS`, campo `ZEMAIL_TMPL_CNT-SPRAS`, T1.2). |
 | `STRICT_MODE` | `X` | Conforme definido no plano (T1.3) — activa `ZCX_TEMPLATE=>UNRESOLVED_PLACEHOLDER` em `ZCL_PLACEHOLDER_SERVICE->check_unresolved` (T3.3). |
 | `BAL_OBJECT` | `ZDEBIT_NOTE` | Objecto de log da Application Log (SLG0) usado por omissão pelo `ZCL_LOGGER_BAL` (T3.1) quando composto pela `ZCL_EMAIL_FACTORY` (T3.8). Decisão confirmada pelo utilizador em 2026-07-10 — ver nota abaixo. |
+| `BAL_SUBOBJECT` | `EMAIL_SEND` | **Adicionado em T3.8 (2026-07-14)** — não fazia parte da lista original de T1.3. `ZEMAIL_CONFIG` só tinha `BAL_OBJECT`, mas `ZCL_LOGGER_BAL` (T3.1) exige também um subobjecto. Distinto de `FI_POST` (usado pelo `ZASSIST` no mesmo objecto `ZDEBIT_NOTE`) para não misturar logs de e-mail com logs de lançamento FI. **Requer registo manual em SLG0** como novo subobjecto do objecto `ZDEBIT_NOTE` — não coberto pelo gate original da Fase 1 (só tabelas/estruturas/mensagens); acrescentar a este SM30 e ao SLG0. |
 | `PA0105_SUBTYPE` | `0010` | Confirmado em `ZCL_DEBIT_NOTE_NOTIFICATION` (constante `c_pa0105_subtype`, comentário original: "e-mail subtype; confirm subtype in PA30") — mesmo valor, agora centralizado aqui em vez de constante hardcoded. |
 
 ### Nota — `BAL_OBJECT`, decisão confirmada (2026-07-10)

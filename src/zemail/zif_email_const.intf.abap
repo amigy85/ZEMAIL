@@ -27,6 +27,20 @@ INTERFACE zif_email_const
     BEGIN OF send_status,
       success TYPE zemail_estado_envio VALUE 'S',
       error   TYPE zemail_estado_envio VALUE 'E',
-    END OF send_status.
+    END OF send_status,
+
+    " Nomes dos parametros de ZEMAIL_CONFIG (usado só por ZCL_EMAIL_FACTORY,
+    " T3.8 — único ponto do framework que lê ZEMAIL_CONFIG). BAL_SUBOBJECT
+    " é um parametro novo, adicionado agora (nao fazia parte da lista
+    " original de T1.3) porque ZEMAIL_CONFIG so tinha BAL_OBJECT e o logger
+    " precisa tambem de um subobjecto BAL.
+    BEGIN OF config_param,
+      sender_address TYPE zemail_config_param VALUE 'SENDER_ADDRESS',
+      fallback_langu TYPE zemail_config_param VALUE 'FALLBACK_LANGU',
+      strict_mode    TYPE zemail_config_param VALUE 'STRICT_MODE',
+      bal_object     TYPE zemail_config_param VALUE 'BAL_OBJECT',
+      bal_subobject  TYPE zemail_config_param VALUE 'BAL_SUBOBJECT',
+      pa0105_subtype TYPE zemail_config_param VALUE 'PA0105_SUBTYPE',
+    END OF config_param.
 
 ENDINTERFACE.

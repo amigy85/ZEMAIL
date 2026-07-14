@@ -114,9 +114,9 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
       - Anexos inline via ADD_ATTACHMENT com content-id (resolve o logo quebrado) — técnica `&BCS_CID=` confirmada por leitura do fonte de `CL_DOCUMENT_BCS` via MCP (uso interno da constante `CP_CID`), não documentada nas assinaturas públicas
       - Remetente de ZEMAIL_CONFIG-SENDER_ADDRESS (injectado no construtor; usado só se `ZEMAIL_S_MESSAGE-SENDER` vier vazio); SET_SEND_IMMEDIATELY( abap_false ); COMMIT delegado ao chamador
       - Devolver send_request->oid( ) TYPE sysuuid_x (corrigido T1.4: CL_BCS não tem método SEND_REQUEST_ID, confirmado via MCP)
-- [ ] **T3.7** `zcl_notification_service.clas.abap` implementa ZIF_EMAIL_SERVICE — fachada: engine → renderer → sender → logger; TRY/CATCH converte tudo em ZCX_EMAIL com contexto
-- [ ] **T3.8** `zcl_email_factory.clas.abap` — `create_notification_service( ) RETURNING zif_email_service` com composição por omissão (provider DB, sender BCS, logger BAL)
-- [ ] **T3.9** `IMPORT_CHECKLIST_FASE_3.md` + commit. **Gate:** activação no CBD + ABAP Unit verdes (resultado reportado pelo utilizador ou consultado via MCP se disponível).
+- [x] **T3.7** `zcl_notification_service.clas.abap` implementa ZIF_EMAIL_SERVICE — fachada: engine → renderer → sender → logger; TRY/CATCH converte tudo em ZCX_EMAIL com contexto — ⚠️ excepções já-`zcx_email` (ZCX_TEMPLATE/ZCX_EMAIL_SEND) apenas registadas em log e reencaminhadas; só exceções verdadeiramente inesperadas (CX_ROOT) são embrulhadas em `zcx_email=>unexpected_error`
+- [x] **T3.8** `zcl_email_factory.clas.abap` — `create_notification_service( ) RETURNING zif_email_service` com composição por omissão (provider DB, sender BCS, logger BAL) — ⚠️ acrescenta `BAL_SUBOBJECT` a `ZEMAIL_CONFIG` (não existia na lista de T1.3) e um novo grupo `config_param` em `ZIF_EMAIL_CONST`
+- [x] **T3.9** `IMPORT_CHECKLIST_FASE_3.md` + commit. **Gate:** activação no CBD + ABAP Unit verdes (resultado reportado pelo utilizador ou consultado via MCP se disponível).
 
 ## FASE 4 — Templates e manutenção → src/zemail/ + templates/
 
