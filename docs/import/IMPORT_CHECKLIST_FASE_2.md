@@ -1,13 +1,46 @@
 # IMPORT CHECKLIST — Fase 2 (Excepções e interfaces ZEMAIL)
 
-> Tarefa **T2.9**. Ficheiros em `src/zemail/` escritos em Git; importar via abapGit ou colar directamente
-> em SE24 (classes) / SE80 (interfaces) no CBD. Claude Code não escreve nada no SAP.
+> Tarefa **T2.9**. Ficheiros em `src/zemail/` escritos em Git, com metadados abapGit (`.clas.xml`/
+> `.intf.xml`) para importação directa via abapGit no CBD — decisão do utilizador (2026-07-14),
+> **diferente da Fase 1**: estes objectos vão directamente para o pacote **`ZEMAIL`** (não para
+> `$TEMPCAI-S2`). Claude Code não escreve nada no SAP nem faz o pull.
 >
-> **Pacote:** seguir a mesma decisão da Fase 1 — criar/colar em `$TEMPCAI-S2` por agora; migração para
-> `ZEMAIL` feita em bloco mais tarde (ver `docs/import/IMPORT_CHECKLIST_FASE_1.md`, secção 0).
+> **Repositório remoto:** `https://github.com/amigy85/ZEMAIL.git` — código enviado (`git push`) pelo
+> Claude Code (acção confirmada pelo utilizador); o **pull no CBD via abapGit é sempre feito pelo
+> utilizador**.
 >
 > **Gate da Fase 2 (definido no plano):** importação abapGit / colagem em SE24-SE80 confirmada pelo
 > utilizador.
+
+## ⚠️ Pré-requisito crítico — criar o pacote `ZEMAIL` ANTES do pull
+
+Verificado a partir do código-fonte real do abapGit (`zcl_abapgit_object_devc.clas.abap`,
+`github.com/abapGit/abapGit`): o ficheiro `package.devc.xml` **nunca transporta a camada de transporte**
+(campo `KORRFLAG`) — esse campo é explicitamente limpo (`CLEAR`) antes de serializar, e ignorado ao
+actualizar um pacote já existente. Um exemplo real do próprio repositório abapGit (`src/package.devc.xml`)
+confirma isto: só tem `<CTEXT>`, nada mais.
+
+**Consequência prática:** se o pacote `ZEMAIL` não existir antes do pull, o abapGit tenta criá-lo do zero
+e a camada de transporte pode ficar indefinida/errada. **Por isso:**
+
+1. Criar o pacote `ZEMAIL` manualmente em **SE21** (ou SE80), com:
+   - Camada de transporte: **`ZEMAIL`** (confirmado pelo utilizador, 2026-07-13/14)
+   - Descrição: "Framework de e-mail HTML reutilizável (ZEMAIL)"
+2. **Só depois** fazer o pull do repositório `https://github.com/amigy85/ZEMAIL.git` no abapGit,
+   apontando para este pacote já existente.
+
+## Ficheiros abapGit gerados
+
+| Ficheiro | Objecto/finalidade | Feito |
+|---|---|---|
+| `.abapgit.xml` (raiz do repo) | Descritor do repositório: `NAME=ZEMAIL`, `STARTING_FOLDER=/src/zemail/`, `FOLDER_LOGIC=PREFIX`, `MASTER_LANGUAGE=P` | [ ] |
+| `src/zemail/package.devc.xml` | Metadados do pacote `ZEMAIL` (só `CTEXT` — ver nota acima sobre transporte) | [ ] |
+| `src/zemail/*.clas.xml` (×3) | Metadados `VSEOCLASS` para as 3 classes de excepção | [ ] |
+| `src/zemail/*.intf.xml` (×5) | Metadados `VSEOINTERF` para os 5 interfaces | [ ] |
+
+Formato de todos os ficheiros verificado directamente contra exemplos reais do próprio repositório
+abapGit (`src/objects/zcl_abapgit_object_devc.clas.xml`, `src/objects/zif_abapgit_object.intf.xml`),
+não escrito de memória.
 
 ## Ordem de criação (dependências)
 
@@ -39,9 +72,10 @@
 
 ## Confirmação e fecho do gate
 
-- [ ] Utilizador confirma que as 3 classes de excepção e os 5 interfaces estão importados/colados e
-      **activos** no CBD (mesmo pacote da Fase 1, `$TEMPCAI-S2`, até à migração combinada).
-- [ ] Claude Code confirma via MCP (leitura) que os 8 objectos existem.
+- [ ] Pacote `ZEMAIL` criado manualmente em SE21 com camada de transporte `ZEMAIL` (ver secção acima).
+- [ ] Utilizador faz o pull do repositório `https://github.com/amigy85/ZEMAIL.git` via abapGit no CBD,
+      apontando para o pacote `ZEMAIL` já existente, e activa os 8 objectos.
+- [ ] Claude Code confirma via MCP (leitura) que os 8 objectos existem **no pacote `ZEMAIL`**.
 - [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 2 como fechada, com a data de
       confirmação do utilizador.
 - [ ] Fase 3 (núcleo do framework) pode então arrancar.
