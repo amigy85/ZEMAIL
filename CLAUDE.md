@@ -97,7 +97,13 @@ O plano de execução completo está em **`PLANO_REFACTOR_ZEMAIL.md`** (mesma pa
 ## Estado actual
 
 - [ ] Fase 1 — DDIC ZEMAIL (especificações docs/ddic/) — gate: criados em SE11/SE91
-- [ ] Fase 2 — Excepções e interfaces — gate: importados/activados no CBD
+      Todos os 26 objectos confirmados via MCP em 2026-07-14, mas ainda no pacote local `$TEMPCAI-S2`
+      (decisão do utilizador: construir tudo primeiro, migrar para `ZEMAIL` depois). Fase só fecha
+      quando essa migração for confirmada.
+- [x] Fase 2 — Excepções e interfaces — gate: importados/activados no CBD
+      Confirmado via MCP em 2026-07-14: os 8 objectos (3 excepções + 5 interfaces) existem, activos,
+      já no pacote definitivo `ZEMAIL` (importados via abapGit a partir de
+      github.com/amigy85/ZEMAIL). Sem ABAP Unit aplicável nesta fase (excepções/interfaces sem lógica).
 - [ ] Fase 3 — Núcleo do framework — gate: activados + ABAP Unit verdes no CBD
 - [ ] Fase 4 — Templates e manutenção — gate: templates carregados e activados
 - [ ] Fase 5 — Pacote ZASSIST — gate: activados + ABAP Unit verdes no CBD

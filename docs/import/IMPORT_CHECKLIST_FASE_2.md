@@ -72,10 +72,14 @@ não escrito de memória.
 
 ## Confirmação e fecho do gate
 
-- [ ] Pacote `ZEMAIL` criado manualmente em SE21 com camada de transporte `ZEMAIL` (ver secção acima).
-- [ ] Utilizador faz o pull do repositório `https://github.com/amigy85/ZEMAIL.git` via abapGit no CBD,
-      apontando para o pacote `ZEMAIL` já existente, e activa os 8 objectos.
-- [ ] Claude Code confirma via MCP (leitura) que os 8 objectos existem **no pacote `ZEMAIL`**.
+- [x] Pacote `ZEMAIL` criado manualmente em SE21 com camada de transporte `ZEMAIL` (ver secção acima).
+- [x] Utilizador fez o pull do repositório `https://github.com/amigy85/ZEMAIL.git` via abapGit no CBD,
+      apontando para o pacote `ZEMAIL` já existente, e activou os 8 objectos.
+- [x] Claude Code confirmou via MCP em 2026-07-14 que os 8 objectos (`ZCX_EMAIL`, `ZCX_TEMPLATE`,
+      `ZCX_EMAIL_SEND`, `ZIF_EMAIL_CONST`, `ZIF_TEMPLATE_PROVIDER`, `ZIF_EMAIL_SENDER`, `ZIF_LOGGER`,
+      `ZIF_EMAIL_SERVICE`) existem, todos no pacote `ZEMAIL`.
+- [ ] Utilizador confirma ABAP Unit / activação sem erros (não aplicável aqui — sem lógica testável nas
+      excepções/interfaces desta fase).
 - [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 2 como fechada, com a data de
       confirmação do utilizador.
 - [ ] Fase 3 (núcleo do framework) pode então arrancar.
