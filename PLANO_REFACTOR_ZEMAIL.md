@@ -87,19 +87,21 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
 
 > Antes de cada classe: consultar via MCP as APIs standard usadas (CL_BCS, CL_BCS_CONVERT, CL_MIME_REPOSITORY_API, BAL_*) para confirmar assinaturas no release 7.40 do CBD.
 
-- [ ] **T3.1** `zcl_logger_bal.clas.abap` implementa ZIF_LOGGER — **ler via MCP o código actual de ZCL_BAL_LOGGER** e generalizar: objecto/sub-objecto BAL no construtor; extnumber parametrizável
-- [ ] **T3.2** `zcl_template_provider_db.clas.abap` (+ `.testclasses.abap`) implementa ZIF_TEMPLATE_PROVIDER
+- [x] **T3.1** `zcl_logger_bal.clas.abap` implementa ZIF_LOGGER — **ler via MCP o código actual de ZCL_BAL_LOGGER** e generalizar: objecto/sub-objecto BAL no construtor; extnumber parametrizável — ⚠️ melhoria adicional: mensagem 00/001 dividida em MSGV1-4 (200 car.) em vez de truncar a 50, corrigindo TODO já documentado no código actual
+- [x] **T3.2** `zcl_template_provider_db.clas.abap` (+ `.testclasses.abap`) implementa ZIF_TEMPLATE_PROVIDER
       - SELECT em ZEMAIL_TMPL_CNT: ESTADO='A', versão mais alta; fallback para FALLBACK_LANGU se idioma não existir
       - Cache HASHED por (id, spras) — 1 SELECT por template por execução
       - Resolver MASTER_ID: carregar também o conteúdo da moldura
       - Validar: content não vazio; master contém `{{BODY}}` → senão ZCX_TEMPLATE=>INVALID_CONTENT
       - **Testes:** template encontrado / fallback de idioma / not_found / cache (2ª chamada sem SELECT — usar double da camada de dados)
-- [ ] **T3.3** `zcl_placeholder_service.clas.abap` (+ testes)
+      - ⚠️ **Decisões além do texto literal:** (1) `iv_fallback_langu` injectado no construtor em vez de lido de ZEMAIL_CONFIG aqui — leitura de config fica só em ZCL_EMAIL_FACTORY (T3.8), por "composição só na factory"; (2) criados `ZIF_TEMPLATE_REPOSITORY` + `ZCL_TEMPLATE_REPOSITORY_DB` como camada de dados injectável, para viabilizar o teste de cache sem `LOCAL FRIENDS`; (3) suporte a `iv_versao` (preview de rascunhos, T4.3) via `read_content_by_version`
+- [x] **T3.3** `zcl_placeholder_service.clas.abap` (+ testes)
       - `replace( iv_html, it_values ) RETURNING string`: REPLACE ALL de `{{NAME}}`; escape HTML dos valores por omissão (opt-out por flag); formatos D (data DDMMYYYY→formato utilizador) e C (moeda por WAERS)
       - `replace_table( iv_html, iv_name, it_data ANY TABLE )`: gera <table> por RTTI para `{{TAB:NAME}}`
       - `check_unresolved( iv_html )`: regex `\{\{[A-Z0-9_:]+\}\}` → se STRICT_MODE, ZCX_TEMPLATE=>UNRESOLVED_PLACEHOLDER
       - **Testes:** escalar / escape / data / moeda / tabela / placeholder por resolver → excepção
-- [ ] **T3.4** `zcl_template_engine.clas.abap` (+ testes)
+      - ⚠️ `iv_strict_mode` injectado no construtor (mesma razão do T3.2); `check_unresolved` recebe também `iv_template_id` (necessário para o atributo MV_TEMPLATE_ID da excepção, não estava no texto abreviado do plano)
+- [x] **T3.4** `zcl_template_engine.clas.abap` (+ testes)
       - Construtor: recebe ZIF_TEMPLATE_PROVIDER + ZCL_PLACEHOLDER_SERVICE
       - `build( iv_template_id, iv_langu, it_values, it_tables ) RETURNING zemail_s_message` (subject+body): injecta child em `{{BODY}}` do master, substitui placeholders no corpo E no assunto, valida unresolved
       - **Testes:** com provider double — master/child / só child / assunto com placeholder
