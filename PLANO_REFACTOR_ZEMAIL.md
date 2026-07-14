@@ -73,15 +73,15 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
 
 ## FASE 2 — Excepções e interfaces (ZEMAIL) → src/zemail/
 
-- [ ] **T2.1** `zcx_email.clas.abap` — raiz, CX_STATIC_CHECK + IF_T100_MESSAGE
-- [ ] **T2.2** `zcx_template.clas.abap` (herda ZCX_EMAIL) — textos: NOT_FOUND, INVALID_CONTENT, UNRESOLVED_PLACEHOLDER; atributos MV_TEMPLATE_ID, MV_PLACEHOLDER
-- [ ] **T2.3** `zcx_email_send.clas.abap` (herda ZCX_EMAIL) — textos: INVALID_RECIPIENT, BCS_ERROR, ATTACHMENT_ERROR
-- [ ] **T2.4** `zif_email_const.intf.abap` — estados de versão, tipos de destinatário, formatos de placeholder
-- [ ] **T2.5** `zif_template_provider.intf.abap` — `get_template( iv_id, iv_langu, iv_versao OPTIONAL ) RETURNING zemail_s_template RAISING zcx_template`; `exists( iv_id, iv_langu ) RETURNING abap_bool`
-- [ ] **T2.6** `zif_email_sender.intf.abap` — `send( is_message ) RETURNING rv_send_id RAISING zcx_email_send`
-- [ ] **T2.7** `zif_logger.intf.abap` — `info( iv_text )`, `warning( iv_text )`, `error( iv_text OPTIONAL, ix_exc OPTIONAL )`, `save( )`
-- [ ] **T2.8** `zif_email_service.intf.abap` — `send( iv_template_id, iv_langu, it_recipients, it_values, it_tables OPTIONAL ) RETURNING zemail_s_send_result RAISING zcx_email`
-- [ ] **T2.9** `IMPORT_CHECKLIST_FASE_2.md` + commit. **Gate:** importação abapGit / colagem em SE24-SE80 confirmada pelo utilizador.
+- [x] **T2.1** `zcx_email.clas.abap` — raiz, CX_STATIC_CHECK + IF_T100_MESSAGE
+- [x] **T2.2** `zcx_template.clas.abap` (herda ZCX_EMAIL) — textos: NOT_FOUND, INVALID_CONTENT, UNRESOLVED_PLACEHOLDER; atributos MV_TEMPLATE_ID, MV_PLACEHOLDER
+- [x] **T2.3** `zcx_email_send.clas.abap` (herda ZCX_EMAIL) — textos: INVALID_RECIPIENT, BCS_ERROR, ATTACHMENT_ERROR; atributos MV_RECIPIENT, MV_CONTENT_ID (string, ver nota no ficheiro), MV_DETAIL (herdado de ZCX_EMAIL)
+- [x] **T2.4** `zif_email_const.intf.abap` — estados de versão, tipos de destinatário, formatos de placeholder — ⚠️ inclui também `send_status` (S/E), não pedido literalmente no plano, mas necessário para evitar literais mágicos com ZEMAIL_ESTADO_ENVIO
+- [x] **T2.5** `zif_template_provider.intf.abap` — `get_template( iv_id, iv_langu, iv_versao OPTIONAL ) RETURNING zemail_s_template RAISING zcx_template`; `exists( iv_id, iv_langu ) RETURNING abap_bool`
+- [x] **T2.6** `zif_email_sender.intf.abap` — `send( is_message ) RETURNING rv_send_id RAISING zcx_email_send`
+- [x] **T2.7** `zif_logger.intf.abap` — `info( iv_text )`, `warning( iv_text )`, `error( iv_text OPTIONAL, ix_exc OPTIONAL )`, `save( )`
+- [x] **T2.8** `zif_email_service.intf.abap` — `send( iv_template_id, iv_langu, it_recipients, it_values, it_tables OPTIONAL ) RETURNING zemail_s_send_result RAISING zcx_email` — ⚠️ `it_tables` tipado como `tt_table_placeholder` (NAME + DATA TYPE REF TO DATA), definido dentro do próprio interface; não existia tipo DDIC pronto para isto
+- [x] **T2.9** `IMPORT_CHECKLIST_FASE_2.md` + commit. **Gate:** importação abapGit / colagem em SE24-SE80 confirmada pelo utilizador.
 
 ## FASE 3 — Núcleo do framework (ZEMAIL) → src/zemail/
 
