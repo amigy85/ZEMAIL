@@ -105,13 +105,14 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
       - Construtor: recebe ZIF_TEMPLATE_PROVIDER + ZCL_PLACEHOLDER_SERVICE
       - `build( iv_template_id, iv_langu, it_values, it_tables ) RETURNING zemail_s_message` (subject+body): injecta child em `{{BODY}}` do master, substitui placeholders no corpo E no assunto, valida unresolved
       - **Testes:** com provider double — master/child / só child / assunto com placeholder
-- [ ] **T3.5** `zcl_email_renderer.clas.abap`
-      - **Pré-requisito DDIC (adiado de T1.4, retomado 2026-07-14):** `docs/ddic/zemail_s_attachment.md` — especificação de `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` + campo `ATTACHMENTS` em `ZEMAIL_S_MESSAGE`, a criar em SE11 (directamente no pacote `ZEMAIL`) antes de implementar esta classe
+- [x] **T3.5** `zcl_email_renderer.clas.abap`
+      - **Pré-requisito DDIC (adiado de T1.4, retomado e concluído 2026-07-14):** `docs/ddic/zemail_s_attachment.md` — `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` + campo `ATTACHMENTS` em `ZEMAIL_S_MESSAGE`, criados directamente no pacote `ZEMAIL`, confirmados via MCP
       - Resolver imagens `cid:` : ler do MIME Repository (CL_MIME_REPOSITORY_API, caminho configurável; logo em /SAP/PUBLIC/ZHCB/logo_hcb.png) e devolver lista de anexos inline (content-id, xstring, mimetype)
-- [ ] **T3.6** `zcl_email_sender_bcs.clas.abap` implementa ZIF_EMAIL_SENDER
+      - ⚠️ `resolve_inline_images` recebe o mapa content-id→caminho MIME como parâmetro (`IT_IMAGES`); o caminho concreto do logo HCB não fica hardcoded nesta classe, é decisão do chamador (T3.7/T5.6)
+- [x] **T3.6** `zcl_email_sender_bcs.clas.abap` implementa ZIF_EMAIL_SENDER
       - CL_BCS + CL_DOCUMENT_BCS (HTM, string→soli_tab via cl_bcs_convert) + CL_CAM_ADDRESS_BCS
-      - Anexos inline via ADD_ATTACHMENT com content-id (resolve o logo quebrado)
-      - Remetente de ZEMAIL_CONFIG-SENDER_ADDRESS; SET_SEND_IMMEDIATELY( abap_false ); COMMIT delegado ao chamador
+      - Anexos inline via ADD_ATTACHMENT com content-id (resolve o logo quebrado) — técnica `&BCS_CID=` confirmada por leitura do fonte de `CL_DOCUMENT_BCS` via MCP (uso interno da constante `CP_CID`), não documentada nas assinaturas públicas
+      - Remetente de ZEMAIL_CONFIG-SENDER_ADDRESS (injectado no construtor; usado só se `ZEMAIL_S_MESSAGE-SENDER` vier vazio); SET_SEND_IMMEDIATELY( abap_false ); COMMIT delegado ao chamador
       - Devolver send_request->oid( ) TYPE sysuuid_x (corrigido T1.4: CL_BCS não tem método SEND_REQUEST_ID, confirmado via MCP)
 - [ ] **T3.7** `zcl_notification_service.clas.abap` implementa ZIF_EMAIL_SERVICE — fachada: engine → renderer → sender → logger; TRY/CATCH converte tudo em ZCX_EMAIL com contexto
 - [ ] **T3.8** `zcl_email_factory.clas.abap` — `create_notification_service( ) RETURNING zif_email_service` com composição por omissão (provider DB, sender BCS, logger BAL)
