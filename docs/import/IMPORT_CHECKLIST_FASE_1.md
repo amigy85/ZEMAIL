@@ -64,15 +64,15 @@ Criar depois da secção 1. Ordem interna conforme dependências (ver `docs/ddic
 
 | # | Objecto | Tipo | Depende de | Feito |
 |---|---|---|---|---|
-| 3.1 | `ZEMAIL_S_TEMPLATE` | Estrutura | 1.1, 1.4 + `SPRAS` | [ ] |
+| 3.1 | `ZEMAIL_S_TEMPLATE` | Estrutura | 1.1, 1.4 + `SPRAS` | [x] |
 | 3.2 | `ZEMAIL_S_RECIPIENT` | Estrutura | 1.8 + `AD_SMTPADR`, `AD_NAME1` | [x] |
 | 3.3 | `ZEMAIL_T_RECIPIENT` | Table type | 3.2 | [x] |
-| 3.4 | `ZEMAIL_S_PLACEHOLDER` | Estrutura | 1.9, 1.10 | [ ] |
-| 3.5 | `ZEMAIL_T_PLACEHOLDER` | Table type | 3.4 | [ ] |
+| 3.4 | `ZEMAIL_S_PLACEHOLDER` | Estrutura | 1.9, 1.10 | [x] |
+| 3.5 | `ZEMAIL_T_PLACEHOLDER` | Table type | 3.4 | [x] |
 | 3.6 | `ZEMAIL_S_MESSAGE` | Estrutura (**sem** `ATTACHMENTS` — ver nota) | 3.3 + `AD_SMTPADR` | [ ] |
 | 3.7 | `ZEMAIL_S_SEND_RESULT` | Estrutura | 1.11 + `SYSUUID_X` | [ ] |
 
-> 3.2/3.3 confirmadas via MCP em 2026-07-13. Faltam 3.1, 3.4, 3.5, 3.6, 3.7.
+> 3.1–3.5 confirmadas via MCP em 2026-07-14. Faltam apenas 3.6 e 3.7.
 
 > **Nota (decisão do utilizador, 2026-07-10):** `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` e o campo
 > `ATTACHMENTS` em `ZEMAIL_S_MESSAGE` **não fazem parte deste gate** — ficam para T3.5, quando
@@ -82,7 +82,11 @@ Criar depois da secção 1. Ordem interna conforme dependências (ver `docs/ddic
 
 | # | Objecto | Ficheiro de especificação | Feito |
 |---|---|---|---|
-| 4.1 | Classe de mensagens `ZEMAIL` (7 textos: 001, 010–012, 020–022) | `docs/msg/zemail_messages.md` | [ ] |
+| 4.1 | Classe de mensagens `ZEMAIL` (7 textos: 001, 010–012, 020–022) | `docs/msg/zemail_messages.md` | [x] objecto criado |
+
+> Confirmado via MCP em 2026-07-14 que a classe de mensagens `ZEMAIL` existe. Os 7 números de mensagem
+> individuais não são verificáveis pelas ferramentas MCP disponíveis — confirmar em SE91 que 001,
+> 010–012 e 020–022 têm os textos e variáveis correctos.
 
 ## 5. Dados iniciais em `ZEMAIL_CONFIG` (recomendado agora, não bloqueia o gate da Fase 1)
 
