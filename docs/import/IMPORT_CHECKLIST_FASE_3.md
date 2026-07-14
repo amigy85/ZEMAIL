@@ -66,15 +66,16 @@
       coberto pelo gate original de Fase 1 — acção nova, ver `docs/ddic/zemail_config.md`).
 - [ ] Inserir os 6 registos de `ZEMAIL_CONFIG` via SM30 (secção 5 do `IMPORT_CHECKLIST_FASE_1.md`,
       incluindo o novo `BAL_SUBOBJECT`).
-- [ ] Utilizador importa os 10 objectos (`ZCL_LOGGER_BAL`, `ZIF_TEMPLATE_REPOSITORY`,
+- [x] Utilizador importou os 10 objectos (`ZCL_LOGGER_BAL`, `ZIF_TEMPLATE_REPOSITORY`,
       `ZCL_TEMPLATE_REPOSITORY_DB`, `ZCL_TEMPLATE_PROVIDER_DB`, `ZCL_PLACEHOLDER_SERVICE`,
       `ZCL_TEMPLATE_ENGINE`, `ZCL_EMAIL_RENDERER`, `ZCL_EMAIL_SENDER_BCS`, `ZCL_NOTIFICATION_SERVICE`,
-      `ZCL_EMAIL_FACTORY`) via abapGit (pacote `ZEMAIL`) e activa.
+      `ZCL_EMAIL_FACTORY`) via abapGit (pacote `ZEMAIL`) e activou.
+- [x] Claude Code confirmou via MCP em 2026-07-14 que os 10 objectos existem, todos activos em `ZEMAIL`.
 - [ ] Utilizador corre ABAP Unit no CBD (T3.2/T3.3/T3.4 têm testes; T3.1/T3.5/T3.6/T3.7/T3.8 não, ver
       plano).
 - [ ] Utilizador testa manualmente `zcl_email_factory=>create_notification_service( )->send( ... )` de
-      ponta a ponta (só possível depois dos registos de `ZEMAIL_CONFIG` acima existirem).
-- [ ] Claude Code confirma via MCP que os 10 objectos existem em `ZEMAIL`.
+      ponta a ponta (só possível depois dos registos de `ZEMAIL_CONFIG` — secção 5 do
+      `IMPORT_CHECKLIST_FASE_1.md` — existirem, incluindo `BAL_SUBOBJECT` novo em SLG0).
 - [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 3 como fechada, com a data de
       confirmação do utilizador.
 - [ ] Fase 4 (templates e manutenção) pode então arrancar.
