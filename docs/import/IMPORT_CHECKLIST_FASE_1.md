@@ -69,10 +69,10 @@ Criar depois da secção 1. Ordem interna conforme dependências (ver `docs/ddic
 | 3.3 | `ZEMAIL_T_RECIPIENT` | Table type | 3.2 | [x] |
 | 3.4 | `ZEMAIL_S_PLACEHOLDER` | Estrutura | 1.9, 1.10 | [x] |
 | 3.5 | `ZEMAIL_T_PLACEHOLDER` | Table type | 3.4 | [x] |
-| 3.6 | `ZEMAIL_S_MESSAGE` | Estrutura (**sem** `ATTACHMENTS` — ver nota) | 3.3 + `AD_SMTPADR` | [ ] |
-| 3.7 | `ZEMAIL_S_SEND_RESULT` | Estrutura | 1.11 + `SYSUUID_X` | [ ] |
+| 3.6 | `ZEMAIL_S_MESSAGE` | Estrutura (**sem** `ATTACHMENTS` — ver nota) | 3.3 + `AD_SMTPADR` | [x] |
+| 3.7 | `ZEMAIL_S_SEND_RESULT` | Estrutura | 1.11 + `SYSUUID_X` | [x] |
 
-> 3.1–3.5 confirmadas via MCP em 2026-07-14. Faltam apenas 3.6 e 3.7.
+> Secção 3 completa (7 de 7) — confirmada via MCP em 2026-07-14.
 
 > **Nota (decisão do utilizador, 2026-07-10):** `ZEMAIL_S_ATTACHMENT`/`ZEMAIL_T_ATTACHMENT` e o campo
 > `ATTACHMENTS` em `ZEMAIL_S_MESSAGE` **não fazem parte deste gate** — ficam para T3.5, quando
