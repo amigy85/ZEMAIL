@@ -13,6 +13,14 @@ CLASS zcl_email_factory DEFINITION
       RETURNING
         VALUE(ri_service) TYPE REF TO zif_email_service.
 
+    " Emissor BCS isolado (sem engine/provider) — usado por ZEMAIL_TMPL_MAINT
+    " (T4.3) para enviar um teste de uma versão específica (possivelmente
+    " rascunho) já renderizada, algo que ZIF_EMAIL_SERVICE~send não permite
+    " porque só resolve sempre a versão activa.
+    CLASS-METHODS create_sender
+      RETURNING
+        VALUE(ri_sender) TYPE REF TO zif_email_sender.
+
   PRIVATE SECTION.
 
     TYPES tt_config TYPE HASHED TABLE OF zemail_config WITH UNIQUE KEY param.
@@ -71,6 +79,15 @@ CLASS zcl_email_factory IMPLEMENTATION.
       io_renderer = lo_renderer
       io_sender   = lo_sender
       io_logger   = lo_logger ).
+  ENDMETHOD.
+
+  METHOD create_sender.
+    DATA(lt_config) = read_config( ).
+
+    ri_sender = NEW zcl_email_sender_bcs(
+      iv_sender_address = CONV #( get_value(
+        it_config = lt_config
+        iv_param  = zif_email_const=>config_param-sender_address ) ) ).
   ENDMETHOD.
 
   METHOD read_config.
