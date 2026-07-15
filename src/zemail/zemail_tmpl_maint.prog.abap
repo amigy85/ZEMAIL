@@ -113,21 +113,21 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
     TRY.
         mo_alv->get_functions( )->add_function(
           name     = c_fc_preview
-          icon     = icon_display
+          icon     = CONV string( icon_display )
           text     = 'Pré-visualizar'
           tooltip  = 'Pré-visualizar versão seleccionada (download .html)'
           position = if_salv_c_function_position=>right_of_salv_functions ).
 
         mo_alv->get_functions( )->add_function(
           name     = c_fc_sendtest
-          icon     = icon_mail
+          icon     = CONV string( icon_mail )
           text     = 'Enviar teste'
           tooltip  = 'Enviar e-mail de teste para o utilizador actual'
           position = if_salv_c_function_position=>right_of_salv_functions ).
 
         mo_alv->get_functions( )->add_function(
           name     = c_fc_activate
-          icon     = icon_okay
+          icon     = CONV string( icon_okay )
           text     = 'Activar'
           tooltip  = 'Activar esta versão (desactiva a anterior no mesmo idioma)'
           position = if_salv_c_function_position=>right_of_salv_functions ).
@@ -160,7 +160,12 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD build_preview_html.
-    DATA(lo_repo)   = NEW zcl_template_repository_db( ).
+    " Tipado pela interface: READ_HEADER/READ_ACTIVE_CONTENT são implementações
+    " de ZIF_TEMPLATE_REPOSITORY e não ficam acessíveis via uma variável tipada
+    " pela classe concreta (sem ALIASES) — só através da referência à interface.
+    DATA lo_repo TYPE REF TO zif_template_repository.
+    lo_repo = NEW zcl_template_repository_db( ).
+
     DATA(ls_header) = lo_repo->read_header( mv_tmplid ).
 
     DATA(lv_content) = is_version-content.
