@@ -33,14 +33,6 @@ CLASS lcl_action_popup DEFINITION FINAL.
       RETURNING
         VALUE(rv_action) TYPE char1.
 
-    CLASS-METHODS on_screen_event
-      IMPORTING
-        iv_ucomm TYPE sy-ucomm.
-
-  PRIVATE SECTION.
-
-    CLASS-DATA gv_action TYPE char1.
-
 ENDCLASS.
 
 
@@ -52,31 +44,25 @@ CLASS lcl_action_popup IMPLEMENTATION.
     tc_test  = 'Enviar e-mail de teste para mim'.
     tc_activ = 'Activar esta versão'.
 
-    p_c_prev  = abap_true.
-    p_c_test  = abap_false.
+    p_c_prev = abap_true.
+    p_c_test = abap_false.
     p_cactiv = abap_false.
-    gv_action = space.
 
+    " CALL SELECTION-SCREEN devolve sy-subrc = 0 se o utilizador confirmou
+    " (F8/check) e <> 0 se cancelou — não depende de adivinhar o SY-UCOMM
+    " exacto do botão de confirmação (esse era o problema da versão
+    " anterior, baseada em AT SELECTION-SCREEN + WHEN 'OK').
     CALL SELECTION-SCREEN c_dynnr STARTING AT 30 5 ENDING AT 90 12.
 
-    rv_action = gv_action.
-  ENDMETHOD.
+    CHECK sy-subrc = 0.
 
-  METHOD on_screen_event.
-    CASE iv_ucomm.
-      WHEN 'OK'.
-        IF p_c_prev = abap_true.
-          gv_action = 'P'.
-        ELSEIF p_c_test = abap_true.
-          gv_action = 'T'.
-        ELSEIF p_cactiv = abap_true.
-          gv_action = 'A'.
-        ENDIF.
-      WHEN OTHERS.
-        gv_action = space.
-    ENDCASE.
-
-    LEAVE TO SCREEN 0.
+    IF p_c_prev = abap_true.
+      rv_action = 'P'.
+    ELSEIF p_c_test = abap_true.
+      rv_action = 'T'.
+    ELSEIF p_cactiv = abap_true.
+      rv_action = 'A'.
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.
@@ -346,11 +332,6 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
 
 ENDCLASS.
 
-
-AT SELECTION-SCREEN.
-  IF sy-dynnr = lcl_action_popup=>c_dynnr.
-    lcl_action_popup=>on_screen_event( sy-ucomm ).
-  ENDIF.
 
 START-OF-SELECTION.
   NEW lcl_tmpl_maint( )->run( p_tmplid ).
