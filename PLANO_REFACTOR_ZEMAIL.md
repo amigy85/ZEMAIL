@@ -138,7 +138,7 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
       - **Mapeamento da BAPI:** replicar o preenchimento actual (ler via MCP ZCL_MEDICAL_ASSIST_PROCESS->carregar_lancamentos)
 - [ ] **T5.6** `zcl_assist_notif_builder.clas.abap` (+ testes com double de ZIF_EMAIL_SERVICE)
       - AUTHORITY-CHECK P_ORGIN antes de PA0105; SELECT único FOR ALL ENTRIES, subtipo de ZEMAIL_CONFIG (PA0105_SUBTYPE)
-      - Por colaborador (TRY/CATCH individual): montar it_values (NOME, NATUREZA, BENEFICIARIO, VALOR formatado, DEBITO, REFERENCIA, DOC_FI, DATA) e chamar a fachada com 'ZHCB_DEBIT_NOTE'
+      - Por colaborador (TRY/CATCH individual): montar it_values (NOME, NATUREZA, BENEFICIARIO, VALOR formatado, DEBITO, REFERENCIA, DOC_FI, DATA) e chamar a fachada com 'ZDEBIT_NOTE_HCB' (corrigido em T4.4: decisão do utilizador de manter o ID histórico já usado em `ZTMPL_CONTENT`/`ZCL_DEBIT_NOTE_NOTIFICATION`, em vez de 'ZHCB_DEBIT_NOTE' como estava aqui antes)
       - Actualizar ZASSIST_RUN-EMAIL_STATUS (S/E) — permite reenvio sem relançar
 - [ ] **T5.7** `zcl_assist_medic_processor.clas.abap` — orquestra reader→validator→poster→notif_builder; devolve tabela de resultados (PERNR, nome, BELNR, email, status, mensagem)
 - [ ] **T5.8** `zrp_assist_medic.prog.abap`
