@@ -19,9 +19,16 @@ CLASS lcl_tmpl_maint DEFINITION.
       c_fc_sendtest TYPE salv_de_function VALUE 'SENDTEST',
       c_fc_activate TYPE salv_de_function VALUE 'ACTIVATE'.
 
-    DATA mv_tmplid   TYPE zemail_template_id.
-    DATA mt_versions TYPE STANDARD TABLE OF zemail_tmpl_cnt WITH DEFAULT KEY.
-    DATA mo_alv      TYPE REF TO cl_salv_table.
+    DATA mv_tmplid    TYPE zemail_template_id.
+    DATA mt_versions  TYPE STANDARD TABLE OF zemail_tmpl_cnt WITH DEFAULT KEY.
+    DATA mo_alv       TYPE REF TO cl_salv_table.
+    " CL_SALV_FUNCTIONS->ADD_FUNCTION so funciona quando o ALV esta
+    " embutido num container (DISPLAY_OBJECT = GRID) - em ecra completo
+    " sem container (FULLSCREEN_GRID, o omisso de CL_SALV_TABLE=>FACTORY
+    " sem R_CONTAINER) o ENABLE_FUNCTION interno do ADD_FUNCTION levanta
+    " CX_SALV_METHOD_NOT_SUPPORTED. Por isso usa-se aqui um docking
+    " container a ocupar o ecra todo.
+    DATA mo_container TYPE REF TO cl_gui_docking_container.
 
     METHODS load_versions.
     METHODS display_alv.
@@ -91,8 +98,24 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_alv.
+    " CL_GUI_DOCKING_CONTAINER declara EXCEPTIONS clássicas (não CX_ROOT),
+    " o que impede o uso da sintaxe funcional NEW class( ... ) — tem de ser
+    " CREATE OBJECT clássico.
+    CREATE OBJECT mo_container
+      EXPORTING
+        side      = cl_gui_docking_container=>dock_at_top
+        extension = 9999
+      EXCEPTIONS
+        OTHERS    = 1.
+
+    IF sy-subrc <> 0.
+      MESSAGE 'Erro ao criar o container do ALV.' TYPE 'E'.
+      RETURN.
+    ENDIF.
+
     TRY.
         cl_salv_table=>factory(
+          EXPORTING r_container  = mo_container
           IMPORTING r_salv_table = mo_alv
           CHANGING  t_table      = mt_versions ).
       CATCH cx_salv_msg.
@@ -191,8 +214,17 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
     FIND ALL OCCURRENCES OF REGEX '\{\{[A-Z0-9_:]+\}\}' IN rv_html RESULTS DATA(lt_matches).
     SORT lt_matches BY offset DESCENDING.
 
+    " O offset/length do acesso a subcadeia tem de ser uma variável simples,
+    " não uma expressão aritmética inline (ex.: rv_html+off+2(len-4) não
+    " compila) — por isso calculados à parte em LV_OFF/LV_LEN.
+    DATA lv_off TYPE i.
+    DATA lv_len TYPE i.
+
     LOOP AT lt_matches INTO DATA(ls_match).
-      DATA(lv_name) = rv_html+ls_match-offset+2(ls_match-length-4).
+      lv_off = ls_match-offset + 2.
+      lv_len = ls_match-length - 4.
+      DATA(lv_name) = rv_html+lv_off(lv_len).
+
       REPLACE SECTION OFFSET ls_match-offset LENGTH ls_match-length
         OF rv_html WITH |[{ lv_name }]|.
     ENDLOOP.

@@ -129,7 +129,11 @@ CLASS zcl_placeholder_service IMPLEMENTATION.
       MATCH LENGTH DATA(lv_length).
     CHECK sy-subrc = 0.
 
-    DATA(lv_placeholder) = iv_html+lv_offset+2(lv_length-4).
+    " Offset/length de acesso a subcadeia tem de ser variável simples, não
+    " expressão aritmética inline (iv_html+lv_offset+2(...) não compila).
+    DATA(lv_name_off) = lv_offset + 2.
+    DATA(lv_name_len) = lv_length - 4.
+    DATA(lv_placeholder) = iv_html+lv_name_off(lv_name_len).
 
     RAISE EXCEPTION TYPE zcx_template
       EXPORTING
