@@ -120,7 +120,7 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
 
 ## FASE 4 — Templates e manutenção → src/zemail/ + templates/
 
-- [ ] **T4.1** `zemail_tmpl_load.prog.abap` — carregar HTML de ficheiro (frontend) para ZEMAIL_TMPL_CNT como nova versão Rascunho (substitui ZLOAD_EMAIL_TEMPLATE; agora 1 registo STRING, sem fragmentação)
+- [x] **T4.1** `zemail_tmpl_load.prog.abap` — carregar HTML de ficheiro (frontend) para ZEMAIL_TMPL_CNT como nova versão Rascunho (substitui ZLOAD_EMAIL_TEMPLATE; agora 1 registo STRING, sem fragmentação) — ⚠️ não foi possível ler `ZLOAD_EMAIL_TEMPLATE` via MCP (ligação abap-adt em falha, 2026-07-15); desenhado a partir do padrão de upload já confirmado em `ZCL_MEDICAL_ASSIST_PROCESS->upload_dados` (lido nesta mesma conversa) e da especificação DDIC de T1.2
 - [ ] **T4.2** Converter template actual: **ler via MCP o conteúdo de ZTMPL_CONTENT** (concatenar linhas por ZSEQ) e gerar `templates/zhcb_master.html` (moldura HCB com `{{BODY}}`) + `templates/zhcb_debit_note.html` (corpo); converter variáveis antigas para `{{...}}`. Importação: utilizador executa ZEMAIL_TMPL_LOAD com estes ficheiros (SPRAS='P') e activa.
 - [ ] **T4.3** `zemail_tmpl_maint.prog.abap` — SALV com templates/versões; acções: pré-visualizar (render com valores exemplo em CL_GUI_HTML_VIEWER ou download .html), enviar teste para o próprio, activar versão (desactiva anterior)
 - [ ] **T4.4** `IMPORT_CHECKLIST_FASE_4.md` + commit + gate.
