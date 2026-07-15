@@ -1,8 +1,86 @@
 REPORT zemail_tmpl_maint.
 
-TYPE-POOLS icon.
-
 PARAMETERS p_tmplid TYPE zemail_template_id OBLIGATORY.
+
+" Popup de escolha de acção — SELECTION-SCREEN sub-ecrã (puro texto, sem
+" objecto Dynpro/Screen Painter), invocado via CALL SELECTION-SCREEN.
+" Mesma técnica usada pelo próprio abapGit para o seu popup de login
+" (ZABAPGIT_PASSWORD_DIALOG, classe LCL_PASSWORD_DIALOG).
+SELECTION-SCREEN BEGIN OF SCREEN 1002 TITLE tt_1002.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 1(40) tc_prev FOR FIELD p_c_prev.
+PARAMETERS p_c_prev RADIOBUTTON GROUP acao DEFAULT 'X'.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 1(40) tc_test FOR FIELD p_c_test.
+PARAMETERS p_c_test RADIOBUTTON GROUP acao.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 1(40) tc_activ FOR FIELD p_c_activ.
+PARAMETERS p_c_activ RADIOBUTTON GROUP acao.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF SCREEN 1002.
+
+
+CLASS lcl_action_popup DEFINITION FINAL.
+
+  PUBLIC SECTION.
+
+    CONSTANTS c_dynnr TYPE sy-dynnr VALUE '1002'.
+
+    " 'P' pré-visualizar, 'T' enviar teste, 'A' activar, ' ' cancelado
+    CLASS-METHODS popup
+      RETURNING
+        VALUE(rv_action) TYPE char1.
+
+    CLASS-METHODS on_screen_event
+      IMPORTING
+        iv_ucomm TYPE sy-ucomm.
+
+  PRIVATE SECTION.
+
+    CLASS-DATA gv_action TYPE char1.
+
+ENDCLASS.
+
+
+CLASS lcl_action_popup IMPLEMENTATION.
+
+  METHOD popup.
+    tt_1002  = 'Escolha uma acção'.
+    tc_prev  = 'Pré-visualizar (download .html)'.
+    tc_test  = 'Enviar e-mail de teste para mim'.
+    tc_activ = 'Activar esta versão'.
+
+    p_c_prev  = abap_true.
+    p_c_test  = abap_false.
+    p_c_activ = abap_false.
+    gv_action = space.
+
+    CALL SELECTION-SCREEN c_dynnr STARTING AT 30 5 ENDING AT 90 12.
+
+    rv_action = gv_action.
+  ENDMETHOD.
+
+  METHOD on_screen_event.
+    CASE iv_ucomm.
+      WHEN 'OK'.
+        IF p_c_prev = abap_true.
+          gv_action = 'P'.
+        ELSEIF p_c_test = abap_true.
+          gv_action = 'T'.
+        ELSEIF p_c_activ = abap_true.
+          gv_action = 'A'.
+        ENDIF.
+      WHEN OTHERS.
+        gv_action = space.
+    ENDCASE.
+
+    LEAVE TO SCREEN 0.
+  ENDMETHOD.
+
+ENDCLASS.
+
 
 CLASS lcl_tmpl_maint DEFINITION.
 
@@ -14,32 +92,18 @@ CLASS lcl_tmpl_maint DEFINITION.
 
   PRIVATE SECTION.
 
-    CONSTANTS:
-      c_fc_preview  TYPE salv_de_function VALUE 'PREVIEW',
-      c_fc_sendtest TYPE salv_de_function VALUE 'SENDTEST',
-      c_fc_activate TYPE salv_de_function VALUE 'ACTIVATE'.
-
-    DATA mv_tmplid    TYPE zemail_template_id.
-    DATA mt_versions  TYPE STANDARD TABLE OF zemail_tmpl_cnt WITH DEFAULT KEY.
-    DATA mo_alv       TYPE REF TO cl_salv_table.
-    " CL_SALV_FUNCTIONS->ADD_FUNCTION so funciona quando o ALV esta
-    " embutido num container (DISPLAY_OBJECT = GRID) - em ecra completo
-    " sem container (FULLSCREEN_GRID, o omisso de CL_SALV_TABLE=>FACTORY
-    " sem R_CONTAINER) o ENABLE_FUNCTION interno do ADD_FUNCTION levanta
-    " CX_SALV_METHOD_NOT_SUPPORTED. Por isso usa-se aqui um docking
-    " container a ocupar o ecra todo.
-    DATA mo_container TYPE REF TO cl_gui_docking_container.
+    DATA mv_tmplid   TYPE zemail_template_id.
+    DATA mt_versions TYPE STANDARD TABLE OF zemail_tmpl_cnt WITH DEFAULT KEY.
+    DATA mo_alv      TYPE REF TO cl_salv_table.
 
     METHODS load_versions.
     METHODS display_alv.
-    METHODS add_custom_functions.
 
-    METHODS on_added_function FOR EVENT added_function OF cl_salv_events_table
-      IMPORTING e_salv_function.
-
-    METHODS get_selected_row
-      RETURNING
-        VALUE(rs_version) TYPE zemail_tmpl_cnt.
+    " Duplo-clique não está sujeito à restrição GRID-only que afecta
+    " CL_SALV_FUNCTIONS->ADD_FUNCTION (ver histórico desta tarefa) —
+    " funciona no modo fullscreen simples, sem container nem ecrã próprio.
+    METHODS on_double_click FOR EVENT double_click OF cl_salv_events_table
+      IMPORTING row.
 
     METHODS build_preview_html
       IMPORTING
@@ -98,24 +162,8 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_alv.
-    " CL_GUI_DOCKING_CONTAINER declara EXCEPTIONS clássicas (não CX_ROOT),
-    " o que impede o uso da sintaxe funcional NEW class( ... ) — tem de ser
-    " CREATE OBJECT clássico.
-    CREATE OBJECT mo_container
-      EXPORTING
-        side      = cl_gui_docking_container=>dock_at_top
-        extension = 9999
-      EXCEPTIONS
-        OTHERS    = 1.
-
-    IF sy-subrc <> 0.
-      MESSAGE 'Erro ao criar o container do ALV.' TYPE 'E'.
-      RETURN.
-    ENDIF.
-
     TRY.
         cl_salv_table=>factory(
-          EXPORTING r_container  = mo_container
           IMPORTING r_salv_table = mo_alv
           CHANGING  t_table      = mt_versions ).
       CATCH cx_salv_msg.
@@ -123,8 +171,7 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
         RETURN.
     ENDTRY.
 
-    add_custom_functions( ).
-    SET HANDLER on_added_function FOR mo_alv->get_event( ).
+    SET HANDLER on_double_click FOR mo_alv->get_event( ).
 
     mo_alv->get_functions( )->set_all( abap_true ).
     mo_alv->get_selections( )->set_selection_mode( if_salv_c_selection_mode=>row_column ).
@@ -132,54 +179,23 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
     mo_alv->display( ).
   ENDMETHOD.
 
-  METHOD add_custom_functions.
-    TRY.
-        mo_alv->get_functions( )->add_function(
-          name     = c_fc_preview
-          icon     = CONV string( icon_display )
-          text     = 'Pré-visualizar'
-          tooltip  = 'Pré-visualizar versão seleccionada (download .html)'
-          position = if_salv_c_function_position=>right_of_salv_functions ).
+  METHOD on_double_click.
+    CHECK row > 0.
+    READ TABLE mt_versions INTO DATA(ls_version) INDEX row.
+    CHECK sy-subrc = 0.
 
-        mo_alv->get_functions( )->add_function(
-          name     = c_fc_sendtest
-          icon     = CONV string( icon_mail )
-          text     = 'Enviar teste'
-          tooltip  = 'Enviar e-mail de teste para o utilizador actual'
-          position = if_salv_c_function_position=>right_of_salv_functions ).
+    DATA(lv_action) = lcl_action_popup=>popup( ).
 
-        mo_alv->get_functions( )->add_function(
-          name     = c_fc_activate
-          icon     = CONV string( icon_okay )
-          text     = 'Activar'
-          tooltip  = 'Activar esta versão (desactiva a anterior no mesmo idioma)'
-          position = if_salv_c_function_position=>right_of_salv_functions ).
-      CATCH cx_salv_existing cx_salv_wrong_call.
-    ENDTRY.
-  ENDMETHOD.
-
-  METHOD on_added_function.
-    DATA(ls_version) = get_selected_row( ).
-    IF ls_version IS INITIAL.
-      MESSAGE 'Seleccione uma versão primeiro.' TYPE 'I'.
-      RETURN.
-    ENDIF.
-
-    CASE e_salv_function.
-      WHEN c_fc_preview.
+    CASE lv_action.
+      WHEN 'P'.
         do_preview( ls_version ).
-      WHEN c_fc_sendtest.
+      WHEN 'T'.
         do_sendtest( ls_version ).
-      WHEN c_fc_activate.
+      WHEN 'A'.
         do_activate( ls_version ).
+        load_versions( ).
+        mo_alv->refresh( ).
     ENDCASE.
-  ENDMETHOD.
-
-  METHOD get_selected_row.
-    DATA(lt_rows) = mo_alv->get_selections( )->get_selected_rows( ).
-    CHECK lines( lt_rows ) = 1.
-
-    READ TABLE mt_versions INTO rs_version INDEX lt_rows[ 1 ].
   ENDMETHOD.
 
   METHOD build_preview_html.
@@ -310,9 +326,6 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
 
     COMMIT WORK.
 
-    load_versions( ).
-    mo_alv->refresh( ).
-
     MESSAGE |Versão { is_version-versao } activada para { is_version-spras }.| TYPE 'S'.
   ENDMETHOD.
 
@@ -333,6 +346,11 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
 
 ENDCLASS.
 
+
+AT SELECTION-SCREEN.
+  IF sy-dynnr = lcl_action_popup=>c_dynnr.
+    lcl_action_popup=>on_screen_event( sy-ucomm ).
+  ENDIF.
 
 START-OF-SELECTION.
   NEW lcl_tmpl_maint( )->run( p_tmplid ).
