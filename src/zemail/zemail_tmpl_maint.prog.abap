@@ -16,8 +16,8 @@ SELECTION-SCREEN COMMENT 1(40) tc_test FOR FIELD p_c_test.
 PARAMETERS p_c_test RADIOBUTTON GROUP acao.
 SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN BEGIN OF LINE.
-SELECTION-SCREEN COMMENT 1(40) tc_activ FOR FIELD p_c_activ.
-PARAMETERS p_c_activ RADIOBUTTON GROUP acao.
+SELECTION-SCREEN COMMENT 1(40) tc_activ FOR FIELD p_cactiv.
+PARAMETERS p_cactiv RADIOBUTTON GROUP acao.
 SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN END OF SCREEN 1002.
 
@@ -54,7 +54,7 @@ CLASS lcl_action_popup IMPLEMENTATION.
 
     p_c_prev  = abap_true.
     p_c_test  = abap_false.
-    p_c_activ = abap_false.
+    p_cactiv = abap_false.
     gv_action = space.
 
     CALL SELECTION-SCREEN c_dynnr STARTING AT 30 5 ENDING AT 90 12.
@@ -69,7 +69,7 @@ CLASS lcl_action_popup IMPLEMENTATION.
           gv_action = 'P'.
         ELSEIF p_c_test = abap_true.
           gv_action = 'T'.
-        ELSEIF p_c_activ = abap_true.
+        ELSEIF p_cactiv = abap_true.
           gv_action = 'A'.
         ENDIF.
       WHEN OTHERS.
