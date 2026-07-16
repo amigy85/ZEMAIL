@@ -125,8 +125,8 @@ CLASS zcl_email_sender_bcs IMPLEMENTATION.
     LOOP AT it_recipients INTO DATA(ls_recipient).
       TRY.
           DATA(lo_address) = cl_cam_address_bcs=>create_internet_address(
-            i_address_string = ls_recipient-address
-            i_address_name   = ls_recipient-visible_name ).
+            i_address_string = CONV #( ls_recipient-address )
+            i_address_name   = CONV #( ls_recipient-visible_name ) ).
 
           io_request->add_recipient(
             i_recipient  = lo_address
