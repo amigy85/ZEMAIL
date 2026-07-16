@@ -15,17 +15,19 @@ poster→notif_builder).
 
 ## Estrutura `ZASSIST_S_REGISTO`
 
+**Descrição breve (SE11):** Registo de assistência médica (linha do CSV)
+
 | Campo | Tipo | Elemento/Domínio | Origem/nota |
 |---|---|---|---|
 | PERNR | NUMC8 | `PERNR_D` (standard) | `ty_dado-pernr`, confirmado por uso real via MCP |
 | NOME | CHAR40 | `AD_NAME1` (standard, já reutilizado em `ZEMAIL_S_RECIPIENT-VISIBLE_NAME`) | `ty_dado-nome` |
-| NATUREZA | **STRING** (tipo embutido) | — | `ty_dado-natureza` |
-| BENEFICIARIO | **STRING** (tipo embutido) | — | `ty_dado-beneficiario` |
+| NATUREZA | **STRING** (tipo embutido) | — (sem elemento — rótulo de campo "Natureza") | `ty_dado-natureza` |
+| BENEFICIARIO | **STRING** (tipo embutido) | — (sem elemento — rótulo de campo "Beneficiário") | `ty_dado-beneficiario` |
 | CONTA | CHAR10 | `SAKNR` (standard, confirmado por uso real em `ty_dado-conta`) | Conta G/L da despesa |
 | CENTRO_CUSTO | CHAR10 | `KOSTL` (standard, confirmado por uso real em `ty_dado-centro_custo`) | |
 | BUKRS | CHAR4 | `BUKRS` (standard, confirmado por uso real) | |
-| DATA | CHAR8 | — (tipo livre, igual a `ty_dado-data`) | Data de lançamento, formato `DDMMYYYY` (CSV) |
-| DOC_DAT | CHAR8 | — (tipo livre, igual a `ty_dado-doc_dat`) | Data do documento, formato `DDMMYYYY` (CSV) |
+| DATA | CHAR8 | — (sem elemento — rótulo de campo "Data lançamento") | Data de lançamento, formato `DDMMYYYY` (CSV) |
+| DOC_DAT | CHAR8 | — (sem elemento — rótulo de campo "Data documento") | Data do documento, formato `DDMMYYYY` (CSV) |
 | VALOR | DEC13,2 | `DMBTR` (standard, confirmado por uso real) | Valor de débito do colaborador |
 | VAL_HCB | DEC13,2 | `DMBTR` (standard, confirmado por uso real) | Parte HCB do custo |
 | DEBITO | DEC13,2 | `DMBTR` (standard, confirmado por uso real) | Valor total debitado mostrado no e-mail |
@@ -34,9 +36,15 @@ poster→notif_builder).
 | WAERS | CUKY5 | `WAERS` (standard, confirmado por uso real) | Moeda (default `MZN`, ver `upload_dados`) |
 | IS_VALID | CHAR1 | `ABAP_BOOL` (tipo predefinido, não domínio DDIC) | Preenchido por `ZCL_ASSIST_VALIDATOR` |
 | IS_POSTED | CHAR1 | `ABAP_BOOL` (tipo predefinido) | Preenchido por `ZCL_ASSIST_FI_POSTER` |
-| MESSAGE | **STRING** (tipo embutido) | — | Detalhe de erro de validação ou lançamento |
+| MESSAGE | **STRING** (tipo embutido) | — (sem elemento — rótulo de campo "Mensagem") | Detalhe de erro de validação ou lançamento |
+
+`NATUREZA`/`BENEFICIARIO`/`DATA`/`DOC_DAT`/`MESSAGE` não têm elemento de dados (tipo embutido/livre
+directamente no campo) — o SE11 vai pedir **rótulos de campo** (curto/médio/longo/cabeçalho) em vez de
+uma descrição de elemento; os rótulos sugeridos entre parêntesis acima chegam para o campo curto.
 
 ## Table type `ZASSIST_T_REGISTO`
+
+**Descrição breve (SE11):** Tabela de registos de assistência médica
 
 Linha `ZASSIST_S_REGISTO`, Standard Table (mesma categoria de `tt_dado` actual — sem chave, percorrida
 sequencialmente pelo pipeline, nunca por chave/lookup).

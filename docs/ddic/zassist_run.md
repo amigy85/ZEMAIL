@@ -13,6 +13,8 @@ documentos FI outra vez.
 
 ## Tabela `ZASSIST_RUN`
 
+**Descrição breve (SE11):** Controlo de execuções — assistência médica (dedup)
+
 | Campo | Chave | Tipo | Elemento/Domínio | Notas |
 |---|---|---|---|---|
 | MANDT | X | CLNT3 | `MANDT` (standard) | |
@@ -26,11 +28,21 @@ documentos FI outra vez.
 
 ## Novos domínios/elementos
 
-| Domínio | Tipo | Valores fixos | Elemento de dados |
-|---|---|---|---|
-| `ZASSIST_REFERENCIA` | CHAR20 | — | `ZASSIST_REFERENCIA` (partilhado com `ZASSIST_S_REGISTO-REFERENCIA`) |
-| `ZASSIST_DOCUMENTO` | CHAR10 | — | `ZASSIST_DOCUMENTO` (partilhado com `ZASSIST_S_REGISTO-DOCUMENTO`) |
-| `ZASSIST_EMAIL_STATUS` | CHAR1 | `S`/`E` | `ZASSIST_EMAIL_STATUS` |
+Domínio e elemento de dados homónimos em todos os três casos (mesmo padrão de `ZEMAIL_CONFIG_PARAM`
+etc. em `zemail_config.md`) — a "Descrição breve" abaixo aplica-se a ambos (domínio e elemento).
+
+| Domínio | Tipo | Valores fixos | Elemento de dados | Descrição breve (SE11) |
+|---|---|---|---|---|
+| `ZASSIST_REFERENCIA` | CHAR20 | — | `ZASSIST_REFERENCIA` (partilhado com `ZASSIST_S_REGISTO-REFERENCIA`) | Referência de negócio (assistência médica) |
+| `ZASSIST_DOCUMENTO` | CHAR10 | — | `ZASSIST_DOCUMENTO` (partilhado com `ZASSIST_S_REGISTO-DOCUMENTO`) | Nº documento FI (assistência médica) |
+| `ZASSIST_EMAIL_STATUS` | CHAR1 | `S`/`E` | `ZASSIST_EMAIL_STATUS` | Estado do envio do e-mail (S/E) |
+
+**Textos dos valores fixos de `ZASSIST_EMAIL_STATUS`:**
+
+| Valor | Texto |
+|---|---|
+| `S` | Sucesso |
+| `E` | Erro |
 
 ## Chave primária
 
