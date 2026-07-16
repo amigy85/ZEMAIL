@@ -70,10 +70,10 @@
 
 ## Confirmação e fecho do gate (T3.1–T3.8 — Fase 3 completa)
 
-- [ ] Registar `BAL_SUBOBJECT` = `EMAIL_SEND` como novo subobjecto SLG0 do objecto `ZDEBIT_NOTE` (não
-      coberto pelo gate original de Fase 1 — acção nova, ver `docs/ddic/zemail_config.md`).
-- [ ] Inserir os 6 registos de `ZEMAIL_CONFIG` via SM30 (secção 5 do `IMPORT_CHECKLIST_FASE_1.md`,
-      incluindo o novo `BAL_SUBOBJECT`).
+- [x] Registado `BAL_SUBOBJECT` = `EMAIL_SEND` como subobjecto SLG0 do objecto `ZDEBIT_NOTE`, confirmado
+      2026-07-16.
+- [x] Inseridos os 6 registos de `ZEMAIL_CONFIG` via SM30, confirmado 2026-07-16 (`SENDER_ADDRESS` = caixa
+      de suporte real do negócio).
 - [x] Utilizador importou os 10 objectos (`ZCL_LOGGER_BAL`, `ZIF_TEMPLATE_REPOSITORY`,
       `ZCL_TEMPLATE_REPOSITORY_DB`, `ZCL_TEMPLATE_PROVIDER_DB`, `ZCL_PLACEHOLDER_SERVICE`,
       `ZCL_TEMPLATE_ENGINE`, `ZCL_EMAIL_RENDERER`, `ZCL_EMAIL_SENDER_BCS`, `ZCL_NOTIFICATION_SERVICE`,
