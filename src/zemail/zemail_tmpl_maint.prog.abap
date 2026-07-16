@@ -114,6 +114,30 @@ CLASS lcl_tmpl_maint DEFINITION.
       IMPORTING
         is_version TYPE zemail_tmpl_cnt.
 
+    " Versão activa: exercita o caminho completo da fachada (motor +
+    " logger BAL + toda a ZEMAIL_CONFIG), tal como um consumidor real.
+    METHODS do_sendtest_via_facade
+      IMPORTING
+        is_version TYPE zemail_tmpl_cnt
+        iv_email   TYPE ad_smtpadr.
+
+    " Rascunho: ZIF_EMAIL_SERVICE~SEND só resolve a versão activa, por isso
+    " esta versão específica só pode ser testada através do sender isolado.
+    METHODS do_sendtest_via_sender
+      IMPORTING
+        is_version TYPE zemail_tmpl_cnt
+        iv_email   TYPE ad_smtpadr.
+
+    " Descobre todos os {{NOME}} distintos (moldura + corpo) e gera um valor
+    " de exemplo para cada um — genérico, sem assumir nomes de nenhum
+    " template de negócio específico, para poder testar a fachada com
+    " ZEMAIL_CONFIG-STRICT_MODE = 'X' sem lançar UNRESOLVED_PLACEHOLDER.
+    METHODS build_dummy_values
+      IMPORTING
+        is_version       TYPE zemail_tmpl_cnt
+      RETURNING
+        VALUE(rt_values) TYPE zemail_t_placeholder.
+
     METHODS do_activate
       IMPORTING
         is_version TYPE zemail_tmpl_cnt.
@@ -277,19 +301,90 @@ CLASS lcl_tmpl_maint IMPLEMENTATION.
       RETURN.
     ENDIF.
 
+    IF is_version-estado = zif_email_const=>version_status-active.
+      do_sendtest_via_facade( is_version = is_version iv_email = lv_email ).
+    ELSE.
+      do_sendtest_via_sender( is_version = is_version iv_email = lv_email ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD do_sendtest_via_facade.
+    DATA(lt_values) = build_dummy_values( is_version ).
+
+    TRY.
+        DATA(ls_result) = zcl_email_factory=>create_notification_service( )->send(
+          iv_template_id = mv_tmplid
+          iv_langu       = is_version-spras
+          it_recipients  = VALUE #( ( address        = iv_email
+                                      visible_name   = sy-uname
+                                      recipient_type = zif_email_const=>recipient_type-to_addr ) )
+          it_values      = lt_values ).
+
+        MESSAGE |Teste enviado para { iv_email } via fachada completa ({ ls_result-status }).| TYPE 'S'.
+
+      CATCH zcx_email INTO DATA(lx_email).
+        MESSAGE |Erro ao enviar teste (fachada): { lx_email->get_text( ) }| TYPE 'E'.
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD do_sendtest_via_sender.
     DATA(ls_message) = VALUE zemail_s_message(
-      subject    = |[TESTE] { is_version-subject }|
+      subject    = |[TESTE RASCUNHO] { is_version-subject }|
       body_html  = build_preview_html( is_version )
-      recipients = VALUE #( ( address        = lv_email
+      recipients = VALUE #( ( address        = iv_email
                               visible_name   = sy-uname
                               recipient_type = zif_email_const=>recipient_type-to_addr ) ) ).
 
     TRY.
         zcl_email_factory=>create_sender( )->send( ls_message ).
-        MESSAGE |Teste enviado para { lv_email }.| TYPE 'S'.
+        MESSAGE |Teste enviado para { iv_email } (rascunho, sem passar pela fachada completa).| TYPE 'S'.
       CATCH zcx_email_send INTO DATA(lx_send).
         MESSAGE |Erro ao enviar teste: { lx_send->get_text( ) }| TYPE 'E'.
     ENDTRY.
+  ENDMETHOD.
+
+  METHOD build_dummy_values.
+    DATA lo_repo TYPE REF TO zif_template_repository.
+    lo_repo = NEW zcl_template_repository_db( ).
+
+    DATA(ls_header) = lo_repo->read_header( mv_tmplid ).
+    DATA(lv_combined) = is_version-content.
+
+    IF ls_header-master_id IS NOT INITIAL.
+      DATA(ls_master) = lo_repo->read_active_content(
+        iv_id    = ls_header-master_id
+        iv_langu = is_version-spras ).
+
+      IF ls_master-found = abap_true.
+        lv_combined = lv_combined && ls_master-content.
+      ENDIF.
+    ENDIF.
+
+    FIND ALL OCCURRENCES OF REGEX '\{\{[A-Z0-9_:]+\}\}' IN lv_combined RESULTS DATA(lt_matches).
+
+    DATA lv_off   TYPE i.
+    DATA lv_len   TYPE i.
+    DATA lt_names TYPE HASHED TABLE OF zemail_placeholder_name WITH UNIQUE KEY table_line.
+
+    LOOP AT lt_matches INTO DATA(ls_match).
+      lv_off = ls_match-offset + 2.
+      lv_len = ls_match-length - 4.
+      DATA(lv_name) = CONV zemail_placeholder_name( lv_combined+lv_off(lv_len) ).
+
+      " {{BODY}} é resolvido pelo motor ao injectar o corpo na moldura, não
+      " é um placeholder de negócio; {{TAB:...}} usa REPLACE_TABLE (RTTI),
+      " não faz sentido gerar um valor de texto simples para ele aqui.
+      CHECK lv_name <> 'BODY' AND lv_name NP 'TAB:*'.
+
+      INSERT lv_name INTO TABLE lt_names.
+    ENDLOOP.
+
+    LOOP AT lt_names INTO DATA(lv_distinct_name).
+      INSERT VALUE #( name   = lv_distinct_name
+                       value  = |[{ lv_distinct_name }]|
+                       format = zif_email_const=>placeholder_format-plain )
+        INTO TABLE rt_values.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD do_activate.

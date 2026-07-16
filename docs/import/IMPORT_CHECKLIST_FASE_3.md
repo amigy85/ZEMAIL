@@ -59,6 +59,14 @@
     `SELECT` disperso). Acrescenta `BAL_SUBOBJECT` a `ZEMAIL_CONFIG` (não existia na lista original de
     T1.3 — ver nota em `docs/ddic/zemail_config.md`) e um novo grupo `config_param` em `ZIF_EMAIL_CONST`
     com os nomes dos 6 parâmetros, evitando literais soltos com os nomes dos parâmetros.
+11. **`ZEMAIL_TMPL_MAINT` (T4.3) ajustado para fechar este gate:** a acção "enviar teste" passou a
+    distinguir a versão seleccionada — para uma versão **activa**, `do_sendtest_via_facade` chama agora
+    `zcl_email_factory=>create_notification_service( )->send( ... )` (o caminho completo: motor +
+    logger BAL + toda a `ZEMAIL_CONFIG`), gerando valores de exemplo genéricos para cada `{{NOME}}`
+    encontrado na moldura+corpo (`build_dummy_values`, via `STRICT_MODE`) em vez de assumir nomes de
+    negócio; só para **rascunhos** (que a fachada não consegue resolver) se mantém o `create_sender( )`
+    isolado (`do_sendtest_via_sender`). Isto substitui a necessidade de um programa de teste avulso só
+    para validar o caminho da fachada.
 
 ## Confirmação e fecho do gate (T3.1–T3.8 — Fase 3 completa)
 
@@ -73,9 +81,13 @@
 - [x] Claude Code confirmou via MCP em 2026-07-14 que os 10 objectos existem, todos activos em `ZEMAIL`.
 - [ ] Utilizador corre ABAP Unit no CBD (T3.2/T3.3/T3.4 têm testes; T3.1/T3.5/T3.6/T3.7/T3.8 não, ver
       plano).
-- [ ] Utilizador testa manualmente `zcl_email_factory=>create_notification_service( )->send( ... )` de
-      ponta a ponta (só possível depois dos registos de `ZEMAIL_CONFIG` — secção 5 do
-      `IMPORT_CHECKLIST_FASE_1.md` — existirem, incluindo `BAL_SUBOBJECT` novo em SLG0).
+- [ ] Utilizador reimporta/reactiva `ZEMAIL_TMPL_MAINT` (ver decisão 11 acima) e usa "Enviar teste" sobre
+      a versão **activa** de `ZDEBIT_NOTE_HCB` — isto exercita `create_notification_service( )->send( )`
+      de ponta a ponta (motor, logger BAL, `ZIF_EMAIL_SENDER`) com valores de exemplo gerados
+      automaticamente. Só é necessário ter os registos de `ZEMAIL_CONFIG` (secção 5 do
+      `IMPORT_CHECKLIST_FASE_1.md`) inseridos; se `BAL_SUBOBJECT`/SLG0 ainda não estiver registado, o
+      envio funciona à mesma — `ZCL_LOGGER_BAL` degrada-se silenciosamente (sem log BAL), não bloqueia
+      o envio (ver `ZCL_LOGGER_BAL`, mesmo comportamento do `ZCL_BAL_LOGGER` original).
 - [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 3 como fechada, com a data de
       confirmação do utilizador.
 - [ ] Fase 4 (templates e manutenção) pode então arrancar.
