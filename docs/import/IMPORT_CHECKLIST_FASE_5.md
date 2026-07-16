@@ -10,7 +10,7 @@
 |---|---|---|---|
 | 5.1a | `docs/ddic/zassist_run.md` | Tabela `ZASSIST_RUN` — controlo de execuções/dedup | [x] especificação escrita |
 | 5.1b | `docs/ddic/zassist_s_registo.md` | `ZASSIST_S_REGISTO`/`ZASSIST_T_REGISTO` — substitui `TY_DADO`/`TT_DADO` | [x] especificação escrita |
-| 5.2 | `zcx_assist_process.clas.abap` + `docs/msg/zassist_messages.md` | Excepção T100 do pacote `ZASSIST` | [ ] |
+| 5.2 | `zcx_assist_process.clas.abap` + `docs/msg/zassist_messages.md` | Excepção T100 do pacote `ZASSIST` | [x] escrito em Git |
 | 5.3 | `zif_assist_file_reader.intf.abap`, `zcl_file_reader_frontend.clas.abap`, `zcl_file_reader_server.clas.abap` | Leitura do CSV (frontend `GUI_UPLOAD` / servidor `OPEN DATASET`) | [ ] |
 | 5.4 | `zcl_assist_validator.clas.abap` + `.testclasses.abap` | Validações (mesmas regras de `ZCL_MEDICAL_ASSIST_PROCESS->validar_dados`) | [ ] |
 | 5.5 | `zcl_assist_fi_poster.clas.abap` | Lançamento FI via `BAPI_ACC_DOCUMENT_POST` + dedup `ZASSIST_RUN` | [ ] |
@@ -23,9 +23,14 @@
 1. **`ZCL_MEDICAL_ASSIST_PROCESS` lido via MCP (2026-07-16):** `ty_dado` e as regras de
    `validar_dados`/`carregar_lancamentos`/`enviar_emails` documentadas tal como estão hoje, para
    replicação fiel em T5.1–T5.7 (ver decisões em `PLANO_REFACTOR_ZEMAIL.md`, secção Fase 5).
-2. **Pacote `ZASSIST` já existe no CBD** (confirmado via `SearchObject`), assim como um **grupo de
-   funções `ZASSIST`** não documentado no `CLAUDE.md` — não foi tocado; a confirmar com o utilizador o
-   que é antes de prosseguir com T5.3+ (pode ou não ser relevante para esta migração).
+2. **Pacote `ZASSIST` já existe no CBD** (confirmado via `SearchObject`), assim como um grupo de funções
+   `ZASSIST` não documentado no `CLAUDE.md` — **confirmado pelo utilizador (2026-07-16): não usado,
+   ignorar.**
+3. **Ligação abapGit:** o `.abapgit.xml` deste repositório (raiz) já está ligado ao pacote `ZEMAIL`
+   (`STARTING_FOLDER=/src/zemail/`). `ZASSIST` é um pacote independente — vai precisar de uma **segunda
+   ligação de repositório abapGit** no CBD (mesmo URL do GitHub com uma pasta de início diferente, ou um
+   repositório GitHub separado) antes de se poder importar `src/zassist/`. Não bloqueia a escrita de
+   código agora — só relevante no momento de importar.
 3. **`GJAHR`/`BELNR_D` (elementos standard) não confirmados por leitura directa de código real** — ao
    contrário de `PERNR_D`/`BUKRS`/`SAKNR`/`KOSTL`/`DMBTR`/`WAERS`, que estão comprovadamente em uso em
    `ty_dado` hoje. `zassist_run.md` sinaliza isto explicitamente; confirmar em SE11 ao criar a tabela.
