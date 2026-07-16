@@ -176,10 +176,21 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
         T4.3) — evita ter de escrever entradas de text pool à mão no XML; (2) semáforo implementado com
         `CL_SALV_COLUMN_TABLE->set_icon` sobre uma coluna `SEMAFORO` calculada no relatório (não na
         classe orquestradora — `ZCL_ASSIST_MEDIC_PROCESSOR` devolve só o texto de `STATUS`, mantendo-se
-        agnóstica de UI); `ICON_LED_RED`/`_YELLOW`/`_GREEN` não confirmadas via MCP nesta tarefa (falha
-        de ligação na consulta à tabela `ICON`) — são constantes standard amplamente usadas, mas por
-        confirmar visualmente; (3) `sy-batch` só é verificado dentro do relatório (não na classe
-        orquestradora), decisão coerente com T5.7 (só `IO_READER` varia por chamador)
+        agnóstica de UI); `ICON_LED_RED`/`_YELLOW`/`_GREEN` confirmaram-se correctos (sem erro de
+        activação); (3) `sy-batch` só é verificado dentro do relatório (não na classe orquestradora),
+        decisão coerente com T5.7 (só `IO_READER` varia por chamador)
+      - 🐛 **2 erros de compilação corrigidos após a primeira activação** (confirmados via MCP,
+        `GetClass CL_SALV_COLUMNS`/`CL_SALV_COLUMN_LIST`): (1) `lo_processor->process( iv_file =
+        iv_file ... )` — `iv_file` do relatório é `TYPE rlgrap-filename`, o parâmetro formal de
+        `ZCL_ASSIST_MEDIC_PROCESSOR->process` é `TYPE string`; a conversão implícita não é aceite pelo
+        compilador neste ponto de passagem de parâmetros (ao contrário de uma atribuição simples) —
+        corrigido com `CONV #( iv_file )`, mesmo padrão já usado em `ZCL_FILE_READER_FRONTEND`; (2)
+        `get_columns( )->get_column( 'SEMAFORO' )->set_icon( abap_true )` — `GET_COLUMN` (classe
+        `CL_SALV_COLUMNS`) devolve sempre `TYPE REF TO CL_SALV_COLUMN` (a classe base, sem `SET_ICON`),
+        mesmo quando o objecto real criado internamente é `CL_SALV_COLUMN_TABLE` (confirmado no método
+        `ADD_COLUMN` de `CL_SALV_COLUMNS`, que instancia `CL_SALV_COLUMN_TABLE` para o modelo `table`) —
+        `SET_ICON` só existe em `CL_SALV_COLUMN_LIST` (superclasse de `CL_SALV_COLUMN_TABLE`); corrigido
+        com `CAST cl_salv_column_table( ... )` antes de chamar `SET_ICON`
 - [ ] **T5.9** `IMPORT_CHECKLIST_FASE_5.md` + commit + gate.
 
 ## FASE 6 — Validação final (executada pelo utilizador no CBD; Claude Code prepara e verifica por MCP)

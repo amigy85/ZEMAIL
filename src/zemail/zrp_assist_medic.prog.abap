@@ -107,7 +107,7 @@ CLASS lcl_report IMPLEMENTATION.
 
     TRY.
         DATA(lt_result) = lo_processor->process(
-          iv_file                 = iv_file
+          iv_file                 = CONV #( iv_file )
           iv_modo_teste           = iv_modo_teste
           iv_so_reenviar_falhados = iv_so_reenviar_falhados ).
 
@@ -149,7 +149,15 @@ CLASS lcl_report IMPLEMENTATION.
 
     TRY.
         lo_alv->get_columns( )->set_column_position( columnname = 'SEMAFORO' position = 1 ).
-        lo_alv->get_columns( )->get_column( 'SEMAFORO' )->set_icon( abap_true ).
+
+        " GET_COLUMN devolve TYPE REF TO CL_SALV_COLUMN (classe base, sem
+        " SET_ICON) mesmo para um ALV em tabela, onde o objecto real
+        " criado internamente e sempre CL_SALV_COLUMN_TABLE (confirmado
+        " via MCP, metodo ADD_COLUMN de CL_SALV_COLUMNS) — precisa de
+        " downcast explicito para aceder a SET_ICON (definido em
+        " CL_SALV_COLUMN_LIST, superclasse de CL_SALV_COLUMN_TABLE).
+        DATA(lo_column) = CAST cl_salv_column_table( lo_alv->get_columns( )->get_column( 'SEMAFORO' ) ).
+        lo_column->set_icon( abap_true ).
       CATCH cx_salv_not_found.
     ENDTRY.
 
