@@ -200,8 +200,9 @@ CLASS zcl_placeholder_service IMPLEMENTATION.
         ASSIGN COMPONENT ls_component-name OF STRUCTURE <ls_line> TO FIELD-SYMBOL(<lv_field>).
         CHECK sy-subrc = 0.
 
-        DATA lv_text TYPE string.
-        WRITE <lv_field> TO lv_text.
+        " WRITE ... TO só aceita alvo C/N/D/T, nunca STRING — string template
+        " formata qualquer tipo elementar sem essa restrição.
+        DATA(lv_text) = |{ <lv_field> }|.
         rv_html = rv_html && `<td>` && escape( val = lv_text format = cl_abap_format=>e_html_text ) && `</td>`.
       ENDLOOP.
 
