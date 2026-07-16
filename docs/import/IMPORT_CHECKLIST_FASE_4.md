@@ -55,17 +55,19 @@ também esse objecto (já existente desde a Fase 3).
 
 ## Confirmação e fecho do gate
 
-- [ ] Utilizador cria o cabeçalho `ZEMAIL_TMPL` para `ZDEBIT_NOTE_HCB` em `ZEMAIL_CONFIG`... na verdade em
-      `ZEMAIL_TMPL` (SM30/SE16, se ainda não existir) e para o template de moldura (`master_id` em branco).
-- [ ] Utilizador executa `ZEMAIL_TMPL_LOAD` com `templates/zhcb_master.html` (`TEMPLATE_ID` da moldura,
-      `SPRAS='P'`) e depois com `templates/zhcb_debit_note.html` (`TEMPLATE_ID='ZDEBIT_NOTE_HCB'`,
-      `MASTER_ID` apontando para a moldura, `SPRAS='P'`).
-- [ ] Utilizador activa ambas as versões carregadas via `ZEMAIL_TMPL_MAINT` (acção "Activar").
-- [ ] Utilizador testa "Pré-visualizar" (download `.html`, confirmar visualmente no browser) e "Enviar
-      teste" (confirmar recepção com HTML renderizado, sem `{{` por resolver visível).
-- [ ] Utilizador importa/activa `ZEMAIL_TMPL_LOAD`, `ZEMAIL_TMPL_MAINT` e a `ZCL_EMAIL_FACTORY` actualizada
-      via abapGit.
-- [ ] Claude Code confirma via MCP que os 2 programas existem em `ZEMAIL`.
-- [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 4 como fechada, com a data de
-      confirmação do utilizador.
+- [x] Utilizador criou os cabeçalhos `ZEMAIL_TMPL` (moldura `ZHCB_MASTER` e `ZDEBIT_NOTE_HCB`).
+- [x] Utilizador executou `ZEMAIL_TMPL_LOAD` para `templates/zhcb_master.html` e
+      `templates/zhcb_debit_note.html` (`SPRAS='P'`).
+- [x] Utilizador activou ambas as versões carregadas via `ZEMAIL_TMPL_MAINT`.
+- [x] Utilizador testou "Enviar teste" — e-mail recebido com sucesso (moldura + corpo renderizados).
+      "Pré-visualizar" não foi explicitamente reportado, mas o envio de teste já valida o mesmo caminho
+      de renderização (`build_preview_html`).
+- [x] Utilizador importou/reactivou `ZEMAIL_TMPL_LOAD`, `ZEMAIL_TMPL_MAINT`, `ZCL_EMAIL_FACTORY` e
+      `ZCL_EMAIL_SENDER_BCS` via abapGit, incluindo as correcções de sintaxe/tipo encontradas em runtime
+      (ver `docs/import/VERIFICATION_CHECKLIST_DDIC.md` para o detalhe das divergências corrigidas:
+      `ZCX_EMAIL_SEND` com parâmetros `mv_*` em vez de `iv_*`, e o `CONV` defensivo em
+      `create_internet_address`).
+- [x] Claude Code confirmou via MCP em 2026-07-16 que `ZEMAIL_TMPL_LOAD` e `ZEMAIL_TMPL_MAINT` existem,
+      activos, em `ZEMAIL`.
+- [x] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": Fase 4 fechada (2026-07-16).
 - [ ] Fase 5 (migração do processo ZASSIST) pode então arrancar.

@@ -105,7 +105,13 @@ O plano de execução completo está em **`PLANO_REFACTOR_ZEMAIL.md`** (mesma pa
       já no pacote definitivo `ZEMAIL` (importados via abapGit a partir de
       github.com/amigy85/ZEMAIL). Sem ABAP Unit aplicável nesta fase (excepções/interfaces sem lógica).
 - [ ] Fase 3 — Núcleo do framework — gate: activados + ABAP Unit verdes no CBD
-- [ ] Fase 4 — Templates e manutenção — gate: templates carregados e activados
+      Objectos todos activos em `ZEMAIL` (confirmado via MCP). Validação end-to-end parcial feita via
+      `ZEMAIL_TMPL_MAINT` "Enviar teste" (`ZCL_EMAIL_FACTORY=>create_sender`, `ZCL_TEMPLATE_REPOSITORY_DB`,
+      `ZCL_EMAIL_SENDER_BCS` — e-mail recebido com sucesso, 2026-07-16). Falta: ABAP Unit reportado pelo
+      utilizador e teste do caminho completo `create_notification_service( )->send( )`.
+- [x] Fase 4 — Templates e manutenção — gate: templates carregados e activados
+      Confirmado 2026-07-16: `ZHCB_MASTER`/`ZDEBIT_NOTE_HCB` carregados via `ZEMAIL_TMPL_LOAD` e
+      activados via `ZEMAIL_TMPL_MAINT`; e-mail de teste recebido com moldura+corpo renderizados.
 - [ ] Fase 5 — Pacote ZASSIST — gate: activados + ABAP Unit verdes no CBD
 - [ ] Fase 6 — Validação final (ATC, ponta-a-ponta, SOST)
 
