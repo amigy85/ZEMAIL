@@ -55,13 +55,30 @@
    constantes standard não foram confirmadas via MCP (falha de ligação na consulta à tabela `ICON`);
    confirmar visualmente que o semáforo aparece correcto ao testar `ZRP_ASSIST_MEDIC`.
 
+## Achado — pacote errado nos objectos DDIC já criados (2026-07-16)
+
+Confirmado via MCP (`GetPackage`/`SearchObject`, leitura): os 5 objectos de `ZASSIST_RUN`/
+`ZASSIST_S_REGISTO` já criados pelo utilizador (domínios+elementos `ZASSIST_REFERENCIA`,
+`ZASSIST_DOCUMENTO`, `ZASSIST_EMAIL_STATUS`, a tabela `ZASSIST_RUN` e a estrutura `ZASSIST_S_REGISTO`)
+foram criados no pacote **`ZEMAIL`**, não `ZASSIST` — `GetPackage( 'ZASSIST' )` só mostra os objectos
+antigos de referência. **Decisão do utilizador: reatribuir os 8 objectos (2 domínios+2 elementos
+homónimos + `ZASSIST_RUN` + `ZASSIST_S_REGISTO`) para `ZASSIST` via SE11 → Object Directory Entry.**
+
+- [ ] Reatribuídos os 8 objectos de `ZEMAIL` para `ZASSIST` (SE11 → Goto/Utilities → Object Directory
+      Entry → Package).
+- [ ] Claude Code confirma via MCP, após a reatribuição, que os 8 objectos estão agora em `ZASSIST`.
+
 ## Confirmação e fecho do gate
 
 - [ ] Confirmar em PFCG/SU21 os campos reais de `P_ORGIN` (`INFTY`/`SUBTY`/`PERSA`/`PERSG`/`PERSK`/
       `VDSK1`/`ACTVT`) usados em `ZCL_ASSIST_NOTIF_BUILDER->send_notifications` — não confirmáveis via
       MCP (sem ferramenta para objectos de autorização); baseados em conhecimento SAP HR padrão.
-- [ ] Utilizador cria `ZASSIST_RUN`, `ZASSIST_S_REGISTO`, `ZASSIST_T_REGISTO` em SE11 (secção 5.1).
-- [ ] Utilizador cria a classe de mensagens `ZASSIST` em SE91 (T5.2, incluindo os textos 020–025 de T5.4).
+- [ ] Utilizador cria `ZASSIST_T_REGISTO` em SE11 (secção 5.1) — **directamente no pacote `ZASSIST`**
+      (ainda não existe; `ZASSIST_RUN`/`ZASSIST_S_REGISTO` já existem, mas precisam de reatribuição —
+      ver achado acima).
+- [ ] Utilizador cria a classe de mensagens `ZASSIST` em SE91 (T5.2, incluindo os textos 020–025 de
+      T5.4) — **directamente no pacote `ZASSIST`** (ainda não existe nenhuma classe de mensagens
+      `ZASSIST` no CBD, confirmado via MCP).
 - [ ] Utilizador liga um segundo repositório abapGit no CBD ao pacote `ZASSIST` (mesmo URL do GitHub,
       pasta de início `/src/zassist/`, ou um repositório GitHub separado — ver achado 3 acima).
 - [ ] Utilizador importa/activa os 11 objectos `src/zassist/` via abapGit (pacote `ZASSIST`):
