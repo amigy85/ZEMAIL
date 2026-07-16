@@ -21,10 +21,25 @@ O repositório começa vazio (apenas este ficheiro e `PLANO_REFACTOR_ZEMAIL.md`)
 │   ├── msg/                   ← especificação das classes de mensagens
 │   └── import/                ← IMPORT_CHECKLIST_FASE_N.md por fase
 ├── src/
-│   ├── zemail/                ← pacote ZEMAIL em formato abapGit
-│   └── zassist/                ← pacote ZASSIST em formato abapGit
+│   └── zemail/                ← todo o código-fonte, incluindo os objectos ZCX_ASSIST_*/ZIF_ASSIST_*/
+│                                 ZCL_ASSIST_*/ZRP_ASSIST_MEDIC (ver nota "Pasta única" abaixo)
 └── templates/                 ← HTML carregado via ZEMAIL_TMPL_LOAD
 ```
+
+### ⚠️ Pasta única `src/zemail/` (decisão do utilizador, 2026-07-16)
+
+O repositório Git só está ligado a **um** repositório abapGit no CBD (`.abapgit.xml` na raiz, `NAME=ZEMAIL`,
+`STARTING_FOLDER=/src/zemail/`). Ligar um segundo repositório para o pacote `ZASSIST` revelou-se mais
+fricção do que valia a pena nesta fase — **decisão: todos os objectos `ZASSIST_*`/`ZCL_ASSIST_*`/
+`ZIF_ASSIST_*`/`ZCX_ASSIST_PROCESS`/`ZRP_ASSIST_MEDIC` (DDIC e código) ficam fisicamente no pacote SAP
+`ZEMAIL`, e os ficheiros correspondentes vivem em `src/zemail/` (não existe mais `src/zassist/`)**.
+
+Isto é uma acomodação de ferramentas (abapGit/SE11), **não** uma alteração de arquitectura: a regra
+"`ZEMAIL` nunca referencia objectos `ZASSIST`" continua válida ao nível do código ABAP (nenhuma classe
+`ZCL_EMAIL_*`/`ZCL_TEMPLATE_*`/etc. pode chamar uma classe `ZCL_ASSIST_*`) — só deixou de haver
+separação física de pacote/pasta. Se no futuro se justificar separar de novo (ex. transporte
+independente do `ZASSIST`), os objectos `ZASSIST_*` teriam de ser reatribuídos de pacote (SE03) e os
+ficheiros movidos de volta para uma pasta própria.
 
 ## Comandos
 
@@ -62,7 +77,10 @@ O plano de execução completo está em **`PLANO_REFACTOR_ZEMAIL.md`** (mesma pa
 
 ## Regras de arquitectura (invioláveis)
 
-- `ZEMAIL` **nunca** referencia objectos `ZASSIST` (dependência unidireccional ZASSIST → ZEMAIL).
+- `ZEMAIL` **nunca** referencia objectos `ZASSIST` (dependência unidireccional ZASSIST → ZEMAIL) — regra
+  sobre dependência de código (nenhuma classe do framework `ZEMAIL` chama uma classe `ZCL_ASSIST_*`),
+  independente de os objectos `ZASSIST_*` partilharem fisicamente o pacote/pasta `ZEMAIL` (ver nota
+  "Pasta única" acima).
 - Dependências injectadas por construtor; composição por omissão só na `ZCL_EMAIL_FACTORY`.
 - Consumidores dependem de interfaces (`ZIF_*`), nunca de classes concretas do framework (excepto a factory).
 - Placeholders: `{{NOME}}` / `{{TAB:NOME}}`. E-mail nunca sai com placeholder por resolver.
@@ -113,7 +131,12 @@ O plano de execução completo está em **`PLANO_REFACTOR_ZEMAIL.md`** (mesma pa
 - [x] Fase 4 — Templates e manutenção — gate: templates carregados e activados
       Confirmado 2026-07-16: `ZHCB_MASTER`/`ZDEBIT_NOTE_HCB` carregados via `ZEMAIL_TMPL_LOAD` e
       activados via `ZEMAIL_TMPL_MAINT`; e-mail de teste recebido com moldura+corpo renderizados.
-- [ ] Fase 5 — Pacote ZASSIST — gate: activados + ABAP Unit verdes no CBD
+- [ ] Fase 5 — Processo de assistência médica (código em `src/zemail/`, pacote `ZEMAIL` — ver nota
+      "Pasta única") — gate: activados + ABAP Unit verdes no CBD
+      Código escrito em Git (T5.1–T5.8). DDIC (`ZASSIST_RUN`, `ZASSIST_S_REGISTO`, `ZASSIST_T_REGISTO`,
+      classe de mensagens `ZASSIST`) criado no CBD, no pacote `ZEMAIL` (decisão do utilizador,
+      2026-07-16). Falta: importar/activar os 11 objectos de código, ABAP Unit (T5.4/T5.6) e teste
+      manual de `ZRP_ASSIST_MEDIC`.
 - [ ] Fase 6 — Validação final (ATC, ponta-a-ponta, SOST)
 
 (Actualizar esta lista e os checkboxes do plano à medida que as fases fecham. Registar em cada fase a data de confirmação do utilizador.)

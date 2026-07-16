@@ -125,7 +125,13 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
 - [x] **T4.3** `zemail_tmpl_maint.prog.abap` — SALV com templates/versões; acções: pré-visualizar (render com valores exemplo em CL_GUI_HTML_VIEWER ou download .html), enviar teste para o próprio, activar versão (desactiva anterior) — escolhida a opção *download .html* (mais simples que embutir CL_GUI_HTML_VIEWER num ecrã próprio); ⚠️ acrescenta `ZCL_EMAIL_FACTORY=>create_sender( )` (não previsto no plano) porque `ZIF_EMAIL_SERVICE~send` só resolve a versão activa, e "enviar teste" precisa de testar a versão seleccionada (pode ser rascunho)
 - [x] **T4.4** `IMPORT_CHECKLIST_FASE_4.md` + commit + gate.
 
-## FASE 5 — Migrar o processo (pacote ZASSIST) → src/zassist/ + docs/ddic/
+## FASE 5 — Migrar o processo (pacote ZASSIST) → src/zemail/ + docs/ddic/
+
+> ⚠️ **Decisão do utilizador (2026-07-16):** por fricção do abapGit/SE11 (reatribuição de pacote não
+> surtiu efeito, segundo repositório abapGit seria necessário), todos os objectos `ZASSIST_*`/
+> `ZCL_ASSIST_*`/`ZIF_ASSIST_*`/`ZCX_ASSIST_PROCESS`/`ZRP_ASSIST_MEDIC` ficam fisicamente no pacote
+> `ZEMAIL`, com os ficheiros em `src/zemail/` (não `src/zassist/`, que deixou de existir). Ver nota
+> "Pasta única" em `CLAUDE.md`. A regra de dependência de código ZASSIST→ZEMAIL mantém-se inalterada.
 
 - [x] **T5.1** `docs/ddic/zassist_run.md` — Tabela `ZASSIST_RUN`: MANDT, REFERENCIA CHAR20, PERNR NUMC8 (chave) + BELNR, BUKRS, GJAHR, EMAIL_STATUS CHAR1, CREATED_AT; e `docs/ddic/zassist_s_registo.md` — estrutura DDIC que substitui o TY_DADO (consultar via MCP a definição actual em ZCL_MEDICAL_ASSIST_PROCESS) — ⚠️ `ty_dado` lido via MCP; a maioria dos tipos (`PERNR_D`, `BUKRS`, `SAKNR`, `KOSTL`, `DMBTR`, `WAERS`) confirmada por uso real nessa classe activa; `GJAHR` não tem prova directa nesse fonte (o ano é hoje `CHAR4` derivado, não tipado com `GJAHR`) — assumido por ser universal em FI, mas sinalizado para confirmação em SE11; `BELNR` mantido como `CHAR10` livre (`ZASSIST_DOCUMENTO`, novo), não o elemento standard `BELNR_D`, por não ter prova de uso na classe actual. Encontrado grupo de funções `ZASSIST` já existente no pacote (fora da lista de objectos de referência do `CLAUDE.md`) — a confirmar com o utilizador o que é.
 - [x] **T5.2** `zcx_assist_process.clas.abap` (T100, classe de mensagens ZASSIST → `docs/msg/zassist_messages.md`) — ⚠️ substitui `ZCX_DEBIT_NOTE_ERROR` (lida via MCP: `cx_static_check` com `MV_MESSAGE` livre, sem `IF_T100_MESSAGE` — exactamente o anti-padrão proibido pelas regras do projecto); uma única classe com 5 `TEXT-ID` (`UNEXPECTED_ERROR`, `FILE_READ_ERROR`, `NUMBER_RANGE_ERROR`, `DUPLICATE_RUN`, `FI_POSTING_ERROR`), não uma hierarquia como `ZEMAIL`; `DUPLICATE_RUN` é cenário novo (a versão actual não detecta duplicados, por não ter `ZASSIST_RUN`)

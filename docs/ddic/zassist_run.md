@@ -53,7 +53,10 @@ antes de cada `BAPI_ACC_DOCUMENT_POST`.
 
 Confirmado via MCP (`SearchObject`) que o pacote `ZASSIST` já existe no CBD, e que não existe ainda
 nenhum objecto chamado `ZASSIST_RUN` (sem colisão de nome). Foi encontrado um grupo de funções
-`ZASSIST` já existente no pacote — não faz parte da lista de objectos de referência do `CLAUDE.md`
-("`ZCL_EMAIL_TEMPLATE`, `ZCL_EMAIL_SERVICE`, `ZCL_DEBIT_NOTE_NOTIFICATION`,
-`ZCL_MEDICAL_ASSIST_PROCESS`, `ZRP_ASSIST_PROCESSOR_EXEC`, `ZTMPL_CONTENT`"); não foi lido nem alterado
-— **a confirmar com o utilizador o que é e se tem alguma relação com este processo antes de prosseguir.**
+`ZASSIST` já existente no pacote — confirmado pelo utilizador (2026-07-16): não usado, sem relação com
+este processo.
+
+⚠️ **Actualização (2026-07-16):** apesar do nome, `ZASSIST_RUN` acabou por ficar fisicamente no pacote
+`ZEMAIL`, não `ZASSIST` — decisão do utilizador por fricção do abapGit/SE11 (uma reatribuição de pacote
+via SE11 não surtiu efeito). Ver nota "Pasta única" em `CLAUDE.md` e `docs/import/
+IMPORT_CHECKLIST_FASE_5.md`. Isto não altera nenhum campo/tipo desta especificação.

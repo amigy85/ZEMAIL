@@ -60,5 +60,9 @@ nas duas tabelas — evita ter dois elementos diferentes para o mesmo dado).
 
 Nenhum campo foi omitido; `ZASSIST_S_REGISTO` é uma cópia estrutural completa de `ty_dado`. Não faz
 parte deste gate decidir se algum campo deveria ser removido/renomeado — isso seria uma alteração de
-comportamento não pedida pelo plano (a tarefa é migrar o mesmo processo para o pacote `ZASSIST`, não
-redesenhá-lo).
+comportamento não pedida pelo plano (a tarefa é migrar o mesmo processo, não redesenhá-lo).
+
+## Nota sobre o pacote
+
+⚠️ **Actualização (2026-07-16):** `ZASSIST_S_REGISTO`/`ZASSIST_T_REGISTO` ficam fisicamente no pacote
+`ZEMAIL`, não `ZASSIST` — mesma decisão e mesmo motivo documentados em `zassist_run.md`.

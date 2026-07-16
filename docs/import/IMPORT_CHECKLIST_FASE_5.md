@@ -1,8 +1,13 @@
-# IMPORT CHECKLIST — Fase 5 (Pacote ZASSIST)
+# IMPORT CHECKLIST — Fase 5 (processo de assistência médica)
 
 > Tarefas **T5.1–T5.9**. DDIC em `docs/ddic/` (criação manual em SE11 pelo utilizador, como nas fases
-> anteriores); código ABAP em `src/zassist/`, formato abapGit, para importar no CBD no pacote
-> **`ZASSIST`** (já existe). Claude Code não escreve nada no SAP.
+> anteriores); código ABAP em `src/zemail/`, formato abapGit, para importar no CBD **no pacote `ZEMAIL`**
+> através do repositório abapGit já existente. Claude Code não escreve nada no SAP.
+>
+> ⚠️ **Decisão do utilizador (2026-07-16):** os objectos `ZASSIST_*`/`ZCL_ASSIST_*`/`ZIF_ASSIST_*`/
+> `ZCX_ASSIST_PROCESS`/`ZRP_ASSIST_MEDIC` ficam fisicamente no pacote `ZEMAIL` (não `ZASSIST`), por
+> fricção do abapGit/SE11 — ver "Achado — pacote errado..." abaixo e a nota "Pasta única" em
+> `CLAUDE.md`. `src/zassist/` deixou de existir; todos os ficheiros estão agora em `src/zemail/`.
 
 ## Objectos e ficheiros
 
@@ -27,11 +32,12 @@
 2. **Pacote `ZASSIST` já existe no CBD** (confirmado via `SearchObject`), assim como um grupo de funções
    `ZASSIST` não documentado no `CLAUDE.md` — **confirmado pelo utilizador (2026-07-16): não usado,
    ignorar.**
-3. **Ligação abapGit:** o `.abapgit.xml` deste repositório (raiz) já está ligado ao pacote `ZEMAIL`
-   (`STARTING_FOLDER=/src/zemail/`). `ZASSIST` é um pacote independente — vai precisar de uma **segunda
-   ligação de repositório abapGit** no CBD (mesmo URL do GitHub com uma pasta de início diferente, ou um
-   repositório GitHub separado) antes de se poder importar `src/zassist/`. Não bloqueia a escrita de
-   código agora — só relevante no momento de importar.
+3. **Ligação abapGit — resolvido em definitivo (2026-07-16):** o `.abapgit.xml` deste repositório (raiz)
+   está ligado ao pacote `ZEMAIL` (`STARTING_FOLDER=/src/zemail/`). Ligar um segundo repositório abapGit
+   para `ZASSIST` revelou-se mais fricção do que valia a pena — **decisão do utilizador: todos os
+   objectos `ZASSIST_*` ficam no pacote `ZEMAIL`**, importados pelo mesmo (único) repositório. Os
+   ficheiros `src/zassist/*` foram movidos para `src/zemail/` (`git mv`, sem alterar conteúdo). Ver
+   achado seguinte sobre os objectos DDIC que já tinham sido criados antes desta decisão.
 4. **`GJAHR`/`BELNR_D` (elementos standard) não confirmados por leitura directa de código real** — ao
    contrário de `PERNR_D`/`BUKRS`/`SAKNR`/`KOSTL`/`DMBTR`/`WAERS`, que estão comprovadamente em uso em
    `ty_dado` hoje. `zassist_run.md` sinaliza isto explicitamente; confirmar em SE11 ao criar a tabela.
@@ -55,41 +61,42 @@
    constantes standard não foram confirmadas via MCP (falha de ligação na consulta à tabela `ICON`);
    confirmar visualmente que o semáforo aparece correcto ao testar `ZRP_ASSIST_MEDIC`.
 
-## Achado — pacote errado nos objectos DDIC já criados (2026-07-16)
+## Achado — pacote errado nos objectos DDIC já criados, depois aceite como definitivo (2026-07-16)
 
-Confirmado via MCP (`GetPackage`/`SearchObject`, leitura): os 5 objectos de `ZASSIST_RUN`/
-`ZASSIST_S_REGISTO` já criados pelo utilizador (domínios+elementos `ZASSIST_REFERENCIA`,
-`ZASSIST_DOCUMENTO`, `ZASSIST_EMAIL_STATUS`, a tabela `ZASSIST_RUN` e a estrutura `ZASSIST_S_REGISTO`)
-foram criados no pacote **`ZEMAIL`**, não `ZASSIST` — `GetPackage( 'ZASSIST' )` só mostra os objectos
-antigos de referência. **Decisão do utilizador: reatribuir os 8 objectos (2 domínios+2 elementos
-homónimos + `ZASSIST_RUN` + `ZASSIST_S_REGISTO`) para `ZASSIST` via SE11 → Object Directory Entry.**
+Confirmado via MCP (`GetPackage`/`SearchObject`, leitura): os objectos de `ZASSIST_RUN`/
+`ZASSIST_S_REGISTO` criados pelo utilizador (domínios+elementos `ZASSIST_REFERENCIA`,
+`ZASSIST_DOCUMENTO`, `ZASSIST_EMAIL_STATUS`, a tabela `ZASSIST_RUN`, a estrutura `ZASSIST_S_REGISTO`)
+foram criados no pacote `ZEMAIL`, não `ZASSIST`. Uma primeira tentativa de reatribuição via SE11 →
+Object Directory Entry **não surtiu efeito** (confirmado via MCP: os objectos continuaram em `ZEMAIL`
+mesmo depois do utilizador reportar tê-los reatribuído — possivelmente a mudança não foi guardada com
+transporte, ou o campo certo não foi alterado). Em vez de insistir com SE03 (mass change), **o
+utilizador decidiu aceitar `ZEMAIL` como pacote definitivo para todos os objectos `ZASSIST_*`** — ver
+achado 3 acima e a nota "Pasta única" em `CLAUDE.md`. Dois objectos entretanto também criados
+(`ZASSIST_T_REGISTO`, classe de mensagens `ZASSIST`) já foram criados directamente em `ZEMAIL`, o que
+agora está correcto.
 
-- [ ] Reatribuídos os 8 objectos de `ZEMAIL` para `ZASSIST` (SE11 → Goto/Utilities → Object Directory
-      Entry → Package).
-- [ ] Claude Code confirma via MCP, após a reatribuição, que os 8 objectos estão agora em `ZASSIST`.
+- [x] Decisão tomada e documentada (`CLAUDE.md`, `PLANO_REFACTOR_ZEMAIL.md`, este ficheiro).
+- [x] Ficheiros `src/zassist/*` movidos para `src/zemail/` via `git mv` (sem alteração de conteúdo).
 
 ## Confirmação e fecho do gate
 
 - [ ] Confirmar em PFCG/SU21 os campos reais de `P_ORGIN` (`INFTY`/`SUBTY`/`PERSA`/`PERSG`/`PERSK`/
       `VDSK1`/`ACTVT`) usados em `ZCL_ASSIST_NOTIF_BUILDER->send_notifications` — não confirmáveis via
       MCP (sem ferramenta para objectos de autorização); baseados em conhecimento SAP HR padrão.
-- [ ] Utilizador cria `ZASSIST_T_REGISTO` em SE11 (secção 5.1) — **directamente no pacote `ZASSIST`**
-      (ainda não existe; `ZASSIST_RUN`/`ZASSIST_S_REGISTO` já existem, mas precisam de reatribuição —
-      ver achado acima).
-- [ ] Utilizador cria a classe de mensagens `ZASSIST` em SE91 (T5.2, incluindo os textos 020–025 de
-      T5.4) — **directamente no pacote `ZASSIST`** (ainda não existe nenhuma classe de mensagens
-      `ZASSIST` no CBD, confirmado via MCP).
-- [ ] Utilizador liga um segundo repositório abapGit no CBD ao pacote `ZASSIST` (mesmo URL do GitHub,
-      pasta de início `/src/zassist/`, ou um repositório GitHub separado — ver achado 3 acima).
-- [ ] Utilizador importa/activa os 11 objectos `src/zassist/` via abapGit (pacote `ZASSIST`):
-      `ZCX_ASSIST_PROCESS`, `ZIF_ASSIST_FILE_READER`, `ZCL_FILE_READER_FRONTEND`,
-      `ZCL_FILE_READER_SERVER`, `ZCL_ASSIST_VALIDATOR`, `ZIF_ASSIST_RUN_REPOSITORY`,
-      `ZCL_ASSIST_RUN_REPOSITORY_DB`, `ZCL_ASSIST_FI_POSTER`, `ZCL_ASSIST_NOTIF_BUILDER`,
-      `ZCL_ASSIST_MEDIC_PROCESSOR`, `ZRP_ASSIST_MEDIC`.
-- [ ] Claude Code confirma via MCP que os objectos existem e estão activos em `ZASSIST`.
+- [x] `ZASSIST_RUN`, `ZASSIST_S_REGISTO`, `ZASSIST_T_REGISTO` criados em SE11 (pacote `ZEMAIL`).
+- [x] Classe de mensagens `ZASSIST` criada em SE91 (pacote `ZEMAIL`) — **confirmar que inclui os textos
+      020–025 de T5.4**, além de 001/010–013 (T5.2).
+- [ ] Utilizador importa/activa os 11 objectos de código agora em `src/zemail/` via abapGit (pacote
+      `ZEMAIL`, mesmo repositório único já ligado): `ZCX_ASSIST_PROCESS`, `ZIF_ASSIST_FILE_READER`,
+      `ZCL_FILE_READER_FRONTEND`, `ZCL_FILE_READER_SERVER`, `ZCL_ASSIST_VALIDATOR`,
+      `ZIF_ASSIST_RUN_REPOSITORY`, `ZCL_ASSIST_RUN_REPOSITORY_DB`, `ZCL_ASSIST_FI_POSTER`,
+      `ZCL_ASSIST_NOTIF_BUILDER`, `ZCL_ASSIST_MEDIC_PROCESSOR`, `ZRP_ASSIST_MEDIC`.
+- [ ] Claude Code confirma via MCP que os objectos existem e estão activos em `ZEMAIL`.
 - [ ] Utilizador corre ABAP Unit no CBD (T5.4/T5.6 têm testes).
 - [ ] Utilizador testa `ZRP_ASSIST_MEDIC` em modo teste com o CSV de exemplo (preparado em T6.3, ou um
       subconjunto reaproveitado aqui se disponível mais cedo).
-- [ ] Confirmar via MCP que nenhum objecto `ZEMAIL` referencia `ZASSIST` (regra arquitectural invariável).
+- [ ] Confirmar via MCP (where-used) que nenhuma classe `ZCL_EMAIL_*`/`ZCL_TEMPLATE_*`/`ZIF_EMAIL_*`
+      (framework `ZEMAIL`) referencia uma classe `ZCL_ASSIST_*` (regra arquitectural invariável —
+      dependência de código, não de pacote; ver nota "Pasta única" em `CLAUDE.md`).
 - [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 5 como fechada.
 - [ ] Fase 6 (validação final) pode então arrancar.
