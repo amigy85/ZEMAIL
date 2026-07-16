@@ -131,7 +131,11 @@ Linha `ZEMAIL_S_ATTACHMENT`, Standard Table.
 | 021 | `Erro ao enviar e-mail via BCS: &1` | &1 |
 | 022 | `Erro ao resolver anexo inline &1: &2` | &1, &2 |
 
-## 5. Classes de excepção (SE24) — ⚠️ **verificar TODAS, dado que `ZCX_EMAIL_SEND` já divergiu**
+## 5. Classes de excepção (SE24) — ✅ **as 3 confirmadas via MCP em 2026-07-16 (leitura, `GetClass`)**
+
+`ZCX_EMAIL` e `ZCX_TEMPLATE` nunca tinham divergido; `ZCX_EMAIL_SEND` está confirmado corrigido
+(`iv_recipient`/`iv_content_id`/`iv_detail`, sem `mv_*` nos parâmetros do construtor). Secção mantida
+como referência caso surja nova divergência.
 
 Para cada classe, confirmar que os **nomes dos parâmetros do construtor** são `iv_*` (não `mv_*` —
 esse foi o erro real encontrado em `ZCX_EMAIL_SEND`, provavelmente por um wizard do SE24 ter
