@@ -149,9 +149,11 @@ CLASS zcl_assist_fi_poster IMPLEMENTATION.
     TRY.
         DATA(lv_documento) = next_document_number( cs_dado-data ).
 
-        " Parametros TABLES do CALL FUNCTION (interface classica) so
-        " aceitam uma variavel de tabela ja declarada — nao aceitam
-        " expressoes (chamadas de metodo) nem DATA(...) inline.
+        " CALL FUNCTION (interface classica) nao aceita chamadas de metodo
+        " directamente em nenhuma posicao de parametro (EXPORTING ou
+        " TABLES) — so variaveis ja calculadas ou constructor expressions
+        " (VALUE/COND/...). Todos os valores pre-calculados antes da chamada.
+        DATA(ls_header)   = build_header( iv_documento = lv_documento is_dado = cs_dado ).
         DATA(lt_gl)       = build_gl_line( cs_dado ).
         DATA(lt_payable)  = build_payable_lines( cs_dado ).
         DATA(lt_amounts)  = build_amounts( cs_dado ).
@@ -160,7 +162,7 @@ CLASS zcl_assist_fi_poster IMPLEMENTATION.
 
         CALL FUNCTION 'BAPI_ACC_DOCUMENT_POST'
           EXPORTING
-            documentheader = build_header( iv_documento = lv_documento is_dado = cs_dado )
+            documentheader = ls_header
           TABLES
             accountgl      = lt_gl
             accountpayable = lt_payable
@@ -204,12 +206,14 @@ CLASS zcl_assist_fi_poster IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD next_document_number.
+    DATA(lv_toyear) = year_from_csv_date( iv_date_raw ).
+
     CALL FUNCTION 'NUMBER_GET_NEXT'
       EXPORTING
         nr_range_nr = c_nr_range_nr
         object      = c_nr_object
         subobject   = c_nr_subobject
-        toyear      = year_from_csv_date( iv_date_raw )
+        toyear      = lv_toyear
       IMPORTING
         number      = rv_number
       EXCEPTIONS

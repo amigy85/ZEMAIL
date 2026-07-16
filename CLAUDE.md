@@ -10,6 +10,15 @@ Refactoração da solução SAP de Notas de Débito de Assistência Médica da H
   `FILTER`/`REDUCE`/`FOR ... WHERE`/`BASE` em constructor expressions. **Evitar estas quatro construções
   em código novo** (usar `LOOP`/`READ TABLE`/`APPEND` em vez disso); `VALUE`/`COND`/`SWITCH`/`NEW`/`CONV`/
   string templates/`VALUE #( (...) (...) )` continuam confirmados a compilar (Fases 2–4).
+- ⚠️ **Descoberto em 2026-07-16 (`ZCL_ASSIST_FI_POSTER`):** `CALL FUNCTION` (interface clássica de
+  function module) **não aceita uma chamada de método em nenhuma posição de parâmetro**
+  (`EXPORTING`/`IMPORTING`/`TABLES`) — só uma variável já calculada ou uma constructor expression
+  (`VALUE`/`COND`/...). `documentheader = build_header( ... )` e `toyear = year_from_csv_date( ... )`
+  dispararam ambos "No method can be specified in the current position". **Regra para código novo:**
+  antes de qualquer `CALL FUNCTION`, pré-calcular cada valor que vier de uma chamada de método numa
+  variável simples (`DATA(lv_x) = metodo( ... ).`) e só depois referenciar essa variável no
+  `CALL FUNCTION`. Isto não se aplica a chamadas `obj->metodo( ... )` (sintaxe OO moderna), só ao
+  `CALL FUNCTION` procedimental.
 - **Ambiente:** CBD/010 (`vhhdbcbdci.sap.hcb.co.mz:44300`, HTTPS)
 - **Este repositório Git é o local de trabalho.** Todo o código ABAP é produzido aqui, em formato abapGit, e importado no SAP pelo utilizador.
 
