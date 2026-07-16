@@ -161,10 +161,19 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
         na ALV de T5.8, com base no texto da mensagem, sem precisar de novo campo; (6) sem ABAP Unit
         (mesma razão de `ZCL_EMAIL_FACTORY` em `ZEMAIL` — composição/orquestração com efeitos reais, não
         um algoritmo isolável)
-- [ ] **T5.8** `zrp_assist_medic.prog.abap`
+- [x] **T5.8** `zrp_assist_medic.prog.abap`
       - Selecção: radiobutton frontend/servidor + caminho; checkbox modo teste (renderiza, não lança nem envia); checkbox só reenviar e-mails falhados
       - Saída: ALV SALV com semáforos por registo
       - sy-batch → forçar reader de servidor
+      - ⚠️ decisões: (1) textos do ecrã de selecção via `SELECTION-SCREEN COMMENT` + atribuição em
+        `INITIALIZATION` (mesma técnica, sem `TPOOL` "S", já usada no popup de `ZEMAIL_TMPL_MAINT`,
+        T4.3) — evita ter de escrever entradas de text pool à mão no XML; (2) semáforo implementado com
+        `CL_SALV_COLUMN_TABLE->set_icon` sobre uma coluna `SEMAFORO` calculada no relatório (não na
+        classe orquestradora — `ZCL_ASSIST_MEDIC_PROCESSOR` devolve só o texto de `STATUS`, mantendo-se
+        agnóstica de UI); `ICON_LED_RED`/`_YELLOW`/`_GREEN` não confirmadas via MCP nesta tarefa (falha
+        de ligação na consulta à tabela `ICON`) — são constantes standard amplamente usadas, mas por
+        confirmar visualmente; (3) `sy-batch` só é verificado dentro do relatório (não na classe
+        orquestradora), decisão coerente com T5.7 (só `IO_READER` varia por chamador)
 - [ ] **T5.9** `IMPORT_CHECKLIST_FASE_5.md` + commit + gate.
 
 ## FASE 6 — Validação final (executada pelo utilizador no CBD; Claude Code prepara e verifica por MCP)

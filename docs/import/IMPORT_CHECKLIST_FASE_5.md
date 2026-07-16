@@ -17,7 +17,7 @@
 | 5.6a | `zif_assist_run_repository.intf.abap` + `zcl_assist_run_repository_db.clas.abap` | Camada de dados injectável para `ZASSIST_RUN` (retrofit também em T5.5) | [x] escrito em Git |
 | 5.6 | `zcl_assist_notif_builder.clas.abap` + `.testclasses.abap` | Monta `it_values` e chama a fachada `ZEMAIL` (`ZDEBIT_NOTE_HCB`) | [x] escrito em Git |
 | 5.7 | `zcl_assist_medic_processor.clas.abap` | Orquestrador reader→validator→poster→notif_builder | [x] escrito em Git |
-| 5.8 | `zrp_assist_medic.prog.abap` | Report de execução (frontend/servidor, modo teste, ALV de resultados) | [ ] |
+| 5.8 | `zrp_assist_medic.prog.abap` | Report de execução (frontend/servidor, modo teste, ALV de resultados) | [x] escrito em Git |
 
 ## Achados desta fase (via MCP)
 
@@ -32,24 +32,28 @@
    ligação de repositório abapGit** no CBD (mesmo URL do GitHub com uma pasta de início diferente, ou um
    repositório GitHub separado) antes de se poder importar `src/zassist/`. Não bloqueia a escrita de
    código agora — só relevante no momento de importar.
-3. **`GJAHR`/`BELNR_D` (elementos standard) não confirmados por leitura directa de código real** — ao
+4. **`GJAHR`/`BELNR_D` (elementos standard) não confirmados por leitura directa de código real** — ao
    contrário de `PERNR_D`/`BUKRS`/`SAKNR`/`KOSTL`/`DMBTR`/`WAERS`, que estão comprovadamente em uso em
    `ty_dado` hoje. `zassist_run.md` sinaliza isto explicitamente; confirmar em SE11 ao criar a tabela.
-4. **T5.4 acrescenta os textos 020–025 à classe de mensagens `ZASSIST`** (`docs/msg/zassist_messages.md`)
+5. **T5.4 acrescenta os textos 020–025 à classe de mensagens `ZASSIST`** (`docs/msg/zassist_messages.md`)
    — usados via `MESSAGE eNNN(zassist) INTO`, não como `TEXT-ID` de excepção; criar em SE91 junto com
    001/010–013 (T5.2), antes de activar `ZCL_ASSIST_VALIDATOR`.
-5. **T5.6 descobriu uma lacuna real no `ZEMAIL`:** `ZCL_TEMPLATE_ENGINE->build` nunca reencaminha
+6. **T5.6 descobriu uma lacuna real no `ZEMAIL`:** `ZCL_TEMPLATE_ENGINE->build` nunca reencaminha
    `IV_WAERS` a `ZCL_PLACEHOLDER_SERVICE->replace`, pelo que `FORMAT=CURRENCY` (`ZIF_EMAIL_CONST=>
    placeholder_format-currency`) está inutilizável de ponta-a-ponta via a fachada
    (`create_notification_service( )->send( )`) — nenhum template real usa este formato hoje, por isso
    nunca foi apanhado. `ZCL_ASSIST_NOTIF_BUILDER` contorna isto pré-formatando os valores como texto
    simples (mesma técnica de `ZCL_DEBIT_NOTE_NOTIFICATION`). **Não corrigido** — fica registado para uma
    eventual limpeza futura do framework `ZEMAIL` (fora do âmbito desta fase).
-6. **T5.6 introduziu `ZIF_ASSIST_RUN_REPOSITORY`** (não prevista no plano original) para poder testar
+7. **T5.6 introduziu `ZIF_ASSIST_RUN_REPOSITORY`** (não prevista no plano original) para poder testar
    `ZCL_ASSIST_NOTIF_BUILDER` sem tocar `ZASSIST_RUN` real — mesmo raciocínio da `ZIF_TEMPLATE_REPOSITORY`
    em `ZEMAIL` (T3.2). `ZCL_ASSIST_FI_POSTER` (T5.5) foi retroactivamente ajustada para usar a mesma
    interface em vez de `SELECT`/`INSERT` directos — **reimportar/reactivar `ZCL_ASSIST_FI_POSTER`** (o
    construtor mudou: agora recebe `IO_RUN_REPOSITORY`).
+8. **T5.7 acrescentou `IV_MODO_TESTE`/`IV_SO_REENVIAR_FALHADOS`** a `process( )` (não estavam explícitos
+   no texto do plano) e **T5.8 acrescentou o semáforo ALV** com `ICON_LED_RED`/`_YELLOW`/`_GREEN` — estas
+   constantes standard não foram confirmadas via MCP (falha de ligação na consulta à tabela `ICON`);
+   confirmar visualmente que o semáforo aparece correcto ao testar `ZRP_ASSIST_MEDIC`.
 
 ## Confirmação e fecho do gate
 
@@ -57,8 +61,14 @@
       `VDSK1`/`ACTVT`) usados em `ZCL_ASSIST_NOTIF_BUILDER->send_notifications` — não confirmáveis via
       MCP (sem ferramenta para objectos de autorização); baseados em conhecimento SAP HR padrão.
 - [ ] Utilizador cria `ZASSIST_RUN`, `ZASSIST_S_REGISTO`, `ZASSIST_T_REGISTO` em SE11 (secção 5.1).
-- [ ] Utilizador cria a classe de mensagens `ZASSIST` em SE91 (T5.2).
-- [ ] Utilizador importa/activa os objectos `src/zassist/` via abapGit (pacote `ZASSIST`).
+- [ ] Utilizador cria a classe de mensagens `ZASSIST` em SE91 (T5.2, incluindo os textos 020–025 de T5.4).
+- [ ] Utilizador liga um segundo repositório abapGit no CBD ao pacote `ZASSIST` (mesmo URL do GitHub,
+      pasta de início `/src/zassist/`, ou um repositório GitHub separado — ver achado 3 acima).
+- [ ] Utilizador importa/activa os 11 objectos `src/zassist/` via abapGit (pacote `ZASSIST`):
+      `ZCX_ASSIST_PROCESS`, `ZIF_ASSIST_FILE_READER`, `ZCL_FILE_READER_FRONTEND`,
+      `ZCL_FILE_READER_SERVER`, `ZCL_ASSIST_VALIDATOR`, `ZIF_ASSIST_RUN_REPOSITORY`,
+      `ZCL_ASSIST_RUN_REPOSITORY_DB`, `ZCL_ASSIST_FI_POSTER`, `ZCL_ASSIST_NOTIF_BUILDER`,
+      `ZCL_ASSIST_MEDIC_PROCESSOR`, `ZRP_ASSIST_MEDIC`.
 - [ ] Claude Code confirma via MCP que os objectos existem e estão activos em `ZASSIST`.
 - [ ] Utilizador corre ABAP Unit no CBD (T5.4/T5.6 têm testes).
 - [ ] Utilizador testa `ZRP_ASSIST_MEDIC` em modo teste com o CSV de exemplo (preparado em T6.3, ou um
