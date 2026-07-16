@@ -21,6 +21,18 @@
 | `011` | `Falha ao obter número de documento (intervalo &1)` | &1 = número do intervalo de numeração | `NUMBER_RANGE_ERROR` | `MV_NR_RANGE` |
 | `012` | `Registo já processado: referência &1, colaborador &2` | &1 = referência, &2 = pernr | `DUPLICATE_RUN` | `MV_REFERENCIA`, `MV_PERNR` |
 | `013` | `Erro ao lançar documento FI (colaborador &1): &2` | &1 = pernr, &2 = detalhe do erro BAPI | `FI_POSTING_ERROR` | `MV_PERNR`, `MV_DETAIL` |
+| `020` | `PERNR em branco` | — | *(sem excepção — ver nota)* | — |
+| `021` | `Valor inválido (deve ser > 0)` | — | *(sem excepção)* | — |
+| `022` | `Conta G/L em branco` | — | *(sem excepção)* | — |
+| `023` | `Centro de Custo em branco` | — | *(sem excepção)* | — |
+| `024` | `Data de lançamento em branco` | — | *(sem excepção)* | — |
+| `025` | `Empresa (BUKRS) em branco` | — | *(sem excepção)* | — |
+
+> **Nota sobre 020–025 (T5.4):** não são `TEXT-ID` de `ZCX_ASSIST_PROCESS` — são erros de *validação*
+> (esperados, não excepcionais), reportados como colecção `BAPIRET2` por `ZCL_ASSIST_VALIDATOR`, não como
+> excepção lançada. Usadas via `MESSAGE e020(zassist) INTO lv_text` (clássico, com `INTO` para obter o
+> texto T100 sem exibir popup), depois `sy-msgty`/`sy-msgid`/`sy-msgno` alimentam o `BAPIRET2`. Mesmos 6
+> textos de `ZCL_MEDICAL_ASSIST_PROCESS->validar_dados` (lida via MCP), sem alteração de redacção.
 
 > Corresponde exactamente aos pontos onde `ZCL_MEDICAL_ASSIST_PROCESS` hoje levanta
 > `ZCX_DEBIT_NOTE_ERROR` com uma string livre (`upload_dados` → ficheiro; `carregar_lancamentos` →

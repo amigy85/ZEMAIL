@@ -12,7 +12,7 @@
 | 5.1b | `docs/ddic/zassist_s_registo.md` | `ZASSIST_S_REGISTO`/`ZASSIST_T_REGISTO` — substitui `TY_DADO`/`TT_DADO` | [x] especificação escrita |
 | 5.2 | `zcx_assist_process.clas.abap` + `docs/msg/zassist_messages.md` | Excepção T100 do pacote `ZASSIST` | [x] escrito em Git |
 | 5.3 | `zif_assist_file_reader.intf.abap`, `zcl_file_reader_frontend.clas.abap`, `zcl_file_reader_server.clas.abap` | Leitura do CSV (frontend `GUI_UPLOAD` / servidor `OPEN DATASET`) | [x] escrito em Git |
-| 5.4 | `zcl_assist_validator.clas.abap` + `.testclasses.abap` | Validações (mesmas regras de `ZCL_MEDICAL_ASSIST_PROCESS->validar_dados`) | [ ] |
+| 5.4 | `zcl_assist_validator.clas.abap` + `.testclasses.abap` | Validações (mesmas regras de `ZCL_MEDICAL_ASSIST_PROCESS->validar_dados`) | [x] escrito em Git |
 | 5.5 | `zcl_assist_fi_poster.clas.abap` | Lançamento FI via `BAPI_ACC_DOCUMENT_POST` + dedup `ZASSIST_RUN` | [ ] |
 | 5.6 | `zcl_assist_notif_builder.clas.abap` + `.testclasses.abap` | Monta `it_values` e chama a fachada `ZEMAIL` (`ZDEBIT_NOTE_HCB`) | [ ] |
 | 5.7 | `zcl_assist_medic_processor.clas.abap` | Orquestrador reader→validator→poster→notif_builder | [ ] |
@@ -34,6 +34,9 @@
 3. **`GJAHR`/`BELNR_D` (elementos standard) não confirmados por leitura directa de código real** — ao
    contrário de `PERNR_D`/`BUKRS`/`SAKNR`/`KOSTL`/`DMBTR`/`WAERS`, que estão comprovadamente em uso em
    `ty_dado` hoje. `zassist_run.md` sinaliza isto explicitamente; confirmar em SE11 ao criar a tabela.
+4. **T5.4 acrescenta os textos 020–025 à classe de mensagens `ZASSIST`** (`docs/msg/zassist_messages.md`)
+   — usados via `MESSAGE eNNN(zassist) INTO`, não como `TEXT-ID` de excepção; criar em SE91 junto com
+   001/010–013 (T5.2), antes de activar `ZCL_ASSIST_VALIDATOR`.
 
 ## Confirmação e fecho do gate
 
