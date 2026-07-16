@@ -113,7 +113,10 @@ CLASS zcl_assist_medic_processor IMPLEMENTATION.
     default_currency( CHANGING ct_dados = lt_dados ).
 
     mo_validator->validate( CHANGING ct_dados = lt_dados ).
-    DATA(lv_validos) = lines( FILTER #( lt_dados WHERE is_valid = abap_true ) ).
+    DATA(lv_validos) = 0.
+    LOOP AT lt_dados TRANSPORTING NO FIELDS WHERE is_valid = abap_true.
+      lv_validos = lv_validos + 1.
+    ENDLOOP.
     mo_logger->info( |Validação: { lv_validos } válido(s), { lines( lt_dados ) - lv_validos } inválido(s).| ).
 
     IF iv_modo_teste = abap_true.
@@ -124,7 +127,10 @@ CLASS zcl_assist_medic_processor IMPLEMENTATION.
     ENDIF.
 
     mo_poster->post( CHANGING ct_dados = lt_dados ).
-    DATA(lv_postados) = lines( FILTER #( lt_dados WHERE is_posted = abap_true ) ).
+    DATA(lv_postados) = 0.
+    LOOP AT lt_dados TRANSPORTING NO FIELDS WHERE is_posted = abap_true.
+      lv_postados = lv_postados + 1.
+    ENDLOOP.
     mo_logger->info( |Lançamento FI: { lv_postados } documento(s) lançado(s) (novo ou já existente).| ).
 
     DATA(lt_para_notificar) = COND zassist_t_registo(
@@ -132,7 +138,10 @@ CLASS zcl_assist_medic_processor IMPLEMENTATION.
       ELSE lt_dados ).
 
     DATA(lt_email_results) = mo_notif_builder->send_notifications( lt_para_notificar ).
-    DATA(lv_enviados) = lines( FILTER #( lt_email_results WHERE status = zif_email_const=>send_status-success ) ).
+    DATA(lv_enviados) = 0.
+    LOOP AT lt_email_results TRANSPORTING NO FIELDS WHERE status = zif_email_const=>send_status-success.
+      lv_enviados = lv_enviados + 1.
+    ENDLOOP.
     mo_logger->info( |Notificação: { lv_enviados } e-mail(s) enviado(s) de { lines( lt_email_results ) } tentativa(s).| ).
 
     rt_result = build_result( it_dados = lt_dados it_email_results = lt_email_results ).
@@ -168,16 +177,17 @@ CLASS zcl_assist_medic_processor IMPLEMENTATION.
 
   METHOD build_result.
     LOOP AT it_dados INTO DATA(ls_dado).
-      DATA(ls_email) = VALUE zcl_assist_notif_builder=>ty_result(
-        it_email_results[ pernr = ls_dado-pernr ] OPTIONAL ).
+      DATA(ls_email) = VALUE zcl_assist_notif_builder=>ty_result( ).
+      READ TABLE it_email_results INTO ls_email WITH KEY pernr = ls_dado-pernr.
 
-      rt_result = VALUE #( BASE rt_result
-        ( pernr    = ls_dado-pernr
-          nome     = ls_dado-nome
-          belnr    = ls_dado-documento
-          email    = ls_email-email
-          status   = determine_status( is_dado = ls_dado is_email = ls_email )
-          mensagem = COND #( WHEN ls_email-message IS NOT INITIAL THEN ls_email-message ELSE ls_dado-message ) ) ).
+      APPEND VALUE #(
+        pernr    = ls_dado-pernr
+        nome     = ls_dado-nome
+        belnr    = ls_dado-documento
+        email    = ls_email-email
+        status   = determine_status( is_dado = ls_dado is_email = ls_email )
+        mensagem = COND #( WHEN ls_email-message IS NOT INITIAL THEN ls_email-message ELSE ls_dado-message ) )
+        TO rt_result.
     ENDLOOP.
   ENDMETHOD.
 

@@ -5,6 +5,11 @@
 Refactoração da solução SAP de Notas de Débito de Assistência Médica da HCB (Hidroeléctrica de Cahora Bassa) num framework corporativo reutilizável de e-mails HTML.
 
 - **Sistema alvo:** SAP ECC on-premise, ABAP 7.40 — sintaxe 7.40 apenas (sem 7.50+: nada de `CL_SMTG_EMAIL_API`, etc.)
+- ⚠️ **Descoberto em 2026-07-16 (Fase 5, `ZRP_ASSIST_MEDIC`):** o CBD rejeita `FILTER` ("Operador não
+  previsto") — indício de estar numa support package de 7.40 anterior à SP08, que introduziu
+  `FILTER`/`REDUCE`/`FOR ... WHERE`/`BASE` em constructor expressions. **Evitar estas quatro construções
+  em código novo** (usar `LOOP`/`READ TABLE`/`APPEND` em vez disso); `VALUE`/`COND`/`SWITCH`/`NEW`/`CONV`/
+  string templates/`VALUE #( (...) (...) )` continuam confirmados a compilar (Fases 2–4).
 - **Ambiente:** CBD/010 (`vhhdbcbdci.sap.hcb.co.mz:44300`, HTTPS)
 - **Este repositório Git é o local de trabalho.** Todo o código ABAP é produzido aqui, em formato abapGit, e importado no SAP pelo utilizador.
 

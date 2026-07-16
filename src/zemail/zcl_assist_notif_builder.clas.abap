@@ -157,8 +157,7 @@ CLASS zcl_assist_notif_builder IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD send_notifications.
-    DATA(lt_employees) = build_employee_map(
-      VALUE #( FOR ls_dado IN it_dados WHERE ( is_posted = abap_true ) ( ls_dado ) ) ).
+    DATA(lt_employees) = build_employee_map( it_dados ).
 
     AUTHORITY-CHECK OBJECT 'P_ORGIN'
       ID 'INFTY' FIELD '0105'
@@ -218,7 +217,7 @@ CLASS zcl_assist_notif_builder IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD build_employee_map.
-    LOOP AT it_dados INTO DATA(ls_dado).
+    LOOP AT it_dados INTO DATA(ls_dado) WHERE is_posted = abap_true.
       READ TABLE rt_employees WITH TABLE KEY pernr = ls_dado-pernr
         ASSIGNING FIELD-SYMBOL(<ls_emp>).
 

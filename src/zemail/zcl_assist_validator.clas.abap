@@ -56,9 +56,12 @@ CLASS zcl_assist_validator IMPLEMENTATION.
       <ls_dado>-is_valid = xsdbool( lt_return IS INITIAL ).
 
       IF <ls_dado>-is_valid = abap_false.
-        <ls_dado>-message = concat_lines_of(
-          table = VALUE string_table( FOR ls_return IN lt_return ( ls_return-message ) )
-          sep   = '; ' ).
+        CLEAR <ls_dado>-message.
+        LOOP AT lt_return INTO DATA(ls_msg).
+          <ls_dado>-message = COND #(
+            WHEN <ls_dado>-message IS INITIAL THEN ls_msg-message
+            ELSE <ls_dado>-message && `; ` && ls_msg-message ).
+        ENDLOOP.
 
         APPEND VALUE #( pernr = <ls_dado>-pernr messages = lt_return ) TO rt_result.
       ENDIF.

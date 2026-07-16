@@ -179,6 +179,15 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
         agnóstica de UI); `ICON_LED_RED`/`_YELLOW`/`_GREEN` confirmaram-se correctos (sem erro de
         activação); (3) `sy-batch` só é verificado dentro do relatório (não na classe orquestradora),
         decisão coerente com T5.7 (só `IO_READER` varia por chamador)
+      - 🐛 **`FILTER` rejeitado na activação** ("Operador não previsto FILTER") — indício de que o CBD
+        está numa support package de ABAP 7.40 anterior à introdução de `FILTER`/`REDUCE`/`FOR ... WHERE`
+        /`BASE` (SP08), apesar de `CLAUDE.md` dizer apenas "sintaxe 7.40". Como precaução, **todas** as
+        ocorrências de `FILTER`, `FOR ... WHERE`, `FOR` simples dentro de `VALUE`/`CONCAT_LINES_OF`,
+        `BASE` e tabela-expressão com `OPTIONAL` foram substituídas por `LOOP`/`READ TABLE`/`APPEND`
+        equivalentes em `ZCL_ASSIST_MEDIC_PROCESSOR`, `ZCL_ASSIST_NOTIF_BUILDER` e
+        `ZCL_ASSIST_VALIDATOR` — nenhuma depende de nenhuma dessas construções agora. `VALUE`/`COND`/
+        `SWITCH`/`NEW`/`CONV`/string templates/tabelas literais `VALUE #( (...) (...) )` mantidos (já
+        comprovados a compilar nas Fases 2–4).
       - 🐛 **2 erros de compilação corrigidos após a primeira activação** (confirmados via MCP,
         `GetClass CL_SALV_COLUMNS`/`CL_SALV_COLUMN_LIST`): (1) `lo_processor->process( iv_file =
         iv_file ... )` — `iv_file` do relatório é `TYPE rlgrap-filename`, o parâmetro formal de
