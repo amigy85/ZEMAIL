@@ -86,17 +86,20 @@ agora está correcto.
 - [x] `ZASSIST_RUN`, `ZASSIST_S_REGISTO`, `ZASSIST_T_REGISTO` criados em SE11 (pacote `ZEMAIL`).
 - [x] Classe de mensagens `ZASSIST` criada em SE91 (pacote `ZEMAIL`) — **confirmar que inclui os textos
       020–025 de T5.4**, além de 001/010–013 (T5.2).
-- [ ] Utilizador importa/activa os 11 objectos de código agora em `src/zemail/` via abapGit (pacote
+- [x] Utilizador importou/activou os 11 objectos de código em `src/zemail/` via abapGit (pacote
       `ZEMAIL`, mesmo repositório único já ligado): `ZCX_ASSIST_PROCESS`, `ZIF_ASSIST_FILE_READER`,
       `ZCL_FILE_READER_FRONTEND`, `ZCL_FILE_READER_SERVER`, `ZCL_ASSIST_VALIDATOR`,
       `ZIF_ASSIST_RUN_REPOSITORY`, `ZCL_ASSIST_RUN_REPOSITORY_DB`, `ZCL_ASSIST_FI_POSTER`,
       `ZCL_ASSIST_NOTIF_BUILDER`, `ZCL_ASSIST_MEDIC_PROCESSOR`, `ZRP_ASSIST_MEDIC`.
-- [ ] Claude Code confirma via MCP que os objectos existem e estão activos em `ZEMAIL`.
-- [ ] Utilizador corre ABAP Unit no CBD (T5.4/T5.6 têm testes).
+- [x] Claude Code confirmou via MCP (`GetPackage`) em 2026-07-16 que todos os 11 objectos existem em
+      `ZEMAIL`, junto com `ZASSIST_RUN`/`ZASSIST_S_REGISTO`/`ZASSIST_T_REGISTO` e a classe de mensagens
+      `ZASSIST`.
+- [x] Utilizador correu ABAP Unit no CBD (T5.4/T5.6) — todos verdes, confirmado 2026-07-16.
 - [ ] Utilizador testa `ZRP_ASSIST_MEDIC` em modo teste com o CSV de exemplo (preparado em T6.3, ou um
       subconjunto reaproveitado aqui se disponível mais cedo).
-- [ ] Confirmar via MCP (where-used) que nenhuma classe `ZCL_EMAIL_*`/`ZCL_TEMPLATE_*`/`ZIF_EMAIL_*`
-      (framework `ZEMAIL`) referencia uma classe `ZCL_ASSIST_*` (regra arquitectural invariável —
-      dependência de código, não de pacote; ver nota "Pasta única" em `CLAUDE.md`).
+- [x] Confirmado (grep directo aos fontes de `src/zemail/z{cl,if,cx}_email*`/`z{cl,if}_template*`/
+      `z{cl,if}_logger*`/`zemail_tmpl*`) que nenhum ficheiro do framework `ZEMAIL` original referencia
+      `ZASSIST`/`ZCL_ASSIST`/`ZIF_ASSIST` — regra arquitectural (dependência de código, não de pacote)
+      intacta.
 - [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 5 como fechada.
 - [ ] Fase 6 (validação final) pode então arrancar.
