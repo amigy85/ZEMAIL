@@ -16,7 +16,7 @@
 | 5.5 | `zcl_assist_fi_poster.clas.abap` | Lançamento FI via `BAPI_ACC_DOCUMENT_POST` + dedup `ZASSIST_RUN` | [x] escrito em Git |
 | 5.6a | `zif_assist_run_repository.intf.abap` + `zcl_assist_run_repository_db.clas.abap` | Camada de dados injectável para `ZASSIST_RUN` (retrofit também em T5.5) | [x] escrito em Git |
 | 5.6 | `zcl_assist_notif_builder.clas.abap` + `.testclasses.abap` | Monta `it_values` e chama a fachada `ZEMAIL` (`ZDEBIT_NOTE_HCB`) | [x] escrito em Git |
-| 5.7 | `zcl_assist_medic_processor.clas.abap` | Orquestrador reader→validator→poster→notif_builder | [ ] |
+| 5.7 | `zcl_assist_medic_processor.clas.abap` | Orquestrador reader→validator→poster→notif_builder | [x] escrito em Git |
 | 5.8 | `zrp_assist_medic.prog.abap` | Report de execução (frontend/servidor, modo teste, ALV de resultados) | [ ] |
 
 ## Achados desta fase (via MCP)

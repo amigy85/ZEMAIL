@@ -142,7 +142,25 @@ Extrair da solução actual (ZCL_EMAIL_TEMPLATE, ZCL_EMAIL_SERVICE, ZCL_DEBIT_NO
       - Por colaborador (TRY/CATCH individual): montar it_values (NOME, NATUREZA, BENEFICIARIO, VALOR formatado, DEBITO, REFERENCIA, DOC_FI, DATA) e chamar a fachada com 'ZDEBIT_NOTE_HCB' (corrigido em T4.4: decisão do utilizador de manter o ID histórico já usado em `ZTMPL_CONTENT`/`ZCL_DEBIT_NOTE_NOTIFICATION`, em vez de 'ZHCB_DEBIT_NOTE' como estava aqui antes)
       - Actualizar ZASSIST_RUN-EMAIL_STATUS (S/E) — permite reenvio sem relançar
       - ⚠️ decisões: (1) lógica de agrupamento por PERNR, tabela de linhas HTML com zebra-striping e `format_amount`/`format_date` replicados byte-a-byte de `ZCL_DEBIT_NOTE_NOTIFICATION` (lida via MCP) — `{{TABLE_ROWS}}` continua a ser HTML pré-construído passado como placeholder simples, **não** via `{{TAB:NAME}}`/RTTI do `ZEMAIL` (o template real não usa esse mecanismo, confirmado na Fase 4); (2) **`{{DATA}}`/`{{TOTAL_VALOR}}`/`{{TOTAL_DEBITO}}` pré-formatados como texto simples (`FORMAT=PLAIN`) em vez de usarem `FORMAT=DATE`/`FORMAT=CURRENCY` do `ZEMAIL`** — `FORMAT=DATE` respeitaria o `SY-DATFM` de quem corre o lote (errado para um e-mail externo, que deve ter sempre o mesmo aspecto); `FORMAT=CURRENCY` está de facto **inutilizável de ponta-a-ponta na fachada actual**, porque `ZCL_TEMPLATE_ENGINE->build` nunca reencaminha `IV_WAERS` a `ZCL_PLACEHOLDER_SERVICE->replace` — lacuna real descoberta no framework `ZEMAIL` (Fase 3, já fechada), documentada mas **não corrigida** aqui (fora do âmbito de T5.6); (3) **nova interface `ZIF_ASSIST_RUN_REPOSITORY`** (não nomeada no plano, mesmo raciocínio de `ZIF_TEMPLATE_REPOSITORY` em T3.2): sem ela, esta classe tocaria a BD real (`UPDATE ZASSIST_RUN`) em testes, o que as regras do projecto proíbem — usada também para retrofit de T5.5 (dedup/insert); (4) classe dividida em `send_notifications` (efeitos reais: AUTHORITY-CHECK + `SELECT` PA0105, sem ABAP Unit) e `send_to_employees` (pública, testável com duplos de `ZIF_EMAIL_SERVICE`/`ZIF_ASSIST_RUN_REPOSITORY`); (5) campos `AUTHORITY-CHECK P_ORGIN` (`INFTY`/`SUBTY`/`PERSA`/`PERSG`/`PERSK`/`VDSK1`/`ACTVT`) não confirmados via MCP (sem ferramenta disponível para listar campos de objectos de autorização) — baseados em conhecimento SAP HR padrão, com `PERSA`/`PERSG`/`PERSK`/`VDSK1` = `'*'` (verificação grosseira de acesso, não estrutural por registo); recomenda-se confirmar em PFCG/SU21
-- [ ] **T5.7** `zcl_assist_medic_processor.clas.abap` — orquestra reader→validator→poster→notif_builder; devolve tabela de resultados (PERNR, nome, BELNR, email, status, mensagem)
+- [x] **T5.7** `zcl_assist_medic_processor.clas.abap` — orquestra reader→validator→poster→notif_builder; devolve tabela de resultados (PERNR, nome, BELNR, email, status, mensagem)
+      - ⚠️ decisões: (1) classe actua também como "factory" do pacote `ZASSIST` (não há `ZCL_ASSIST_FACTORY`
+        separada no plano) — único ponto que lê `ZEMAIL_CONFIG-PA0105_SUBTYPE` e chama
+        `ZCL_EMAIL_FACTORY=>create_notification_service( )`, mesma regra "composição só na factory";
+        só `IO_READER` é injectado (varia por chamador, T5.8), o resto é composto no construtor; (2) o
+        *default* de moeda `MZN` (diferido de T5.3) implementado aqui, antes da validação; (3) logger
+        próprio (`ZCL_LOGGER_BAL`, objecto `ZDEBIT_NOTE`/subobjecto `FI_POST`, mesmas constantes de
+        `ZCL_MEDICAL_ASSIST_PROCESS`) — distinto do logger interno da fachada `ZEMAIL`
+        (`BAL_SUBOBJECT=EMAIL_SEND`), que continua a existir e a operar dentro de
+        `create_notification_service( )`; (4) `IV_MODO_TESTE`/`IV_SO_REENVIAR_FALHADOS` acrescentados a
+        `process( )` (não estavam explícitos no texto de T5.7, mas são exigidos por T5.8) — modo teste
+        pára logo após a validação; reenviar-falhados filtra por `ZASSIST_RUN-EMAIL_STATUS <> sucesso`
+        via `ZIF_ASSIST_RUN_REPOSITORY->find`; a semântica exacta pode ainda ser afinada quando o ecrã
+        de T5.8 for construído; (5) "duplicado" (registo já processado antes) não é um valor de `STATUS`
+        distinto no resultado — aparece como `Lançado`/`E-mail enviado` com a mensagem "Já processado
+        anteriormente..." vinda de `ZCL_ASSIST_FI_POSTER`; pode tornar-se uma cor de semáforo específica
+        na ALV de T5.8, com base no texto da mensagem, sem precisar de novo campo; (6) sem ABAP Unit
+        (mesma razão de `ZCL_EMAIL_FACTORY` em `ZEMAIL` — composição/orquestração com efeitos reais, não
+        um algoritmo isolável)
 - [ ] **T5.8** `zrp_assist_medic.prog.abap`
       - Selecção: radiobutton frontend/servidor + caminho; checkbox modo teste (renderiza, não lança nem envia); checkbox só reenviar e-mails falhados
       - Saída: ALV SALV com semáforos por registo
