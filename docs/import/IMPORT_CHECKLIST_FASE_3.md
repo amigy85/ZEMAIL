@@ -83,13 +83,12 @@
       de corrigido `ZCL_PLACEHOLDER_SERVICE=>build_data_rows` (`WRITE ... TO` não aceita alvo `STRING`,
       só C/N/D/T; substituído por string template). T3.1/T3.5/T3.6/T3.7/T3.8 não têm ABAP Unit (ver
       plano).
-- [ ] Utilizador reimporta/reactiva `ZEMAIL_TMPL_MAINT` (ver decisão 11 acima) e usa "Enviar teste" sobre
-      a versão **activa** de `ZDEBIT_NOTE_HCB` — isto exercita `create_notification_service( )->send( )`
-      de ponta a ponta (motor, logger BAL, `ZIF_EMAIL_SENDER`) com valores de exemplo gerados
-      automaticamente. Só é necessário ter os registos de `ZEMAIL_CONFIG` (secção 5 do
-      `IMPORT_CHECKLIST_FASE_1.md`) inseridos; se `BAL_SUBOBJECT`/SLG0 ainda não estiver registado, o
-      envio funciona à mesma — `ZCL_LOGGER_BAL` degrada-se silenciosamente (sem log BAL), não bloqueia
-      o envio (ver `ZCL_LOGGER_BAL`, mesmo comportamento do `ZCL_BAL_LOGGER` original).
-- [ ] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": marcar Fase 3 como fechada, com a data de
-      confirmação do utilizador.
-- [ ] Fase 4 (templates e manutenção) pode então arrancar.
+- [x] Utilizador testou "Enviar teste" sobre a versão **activa** de `ZDEBIT_NOTE_HCB` em
+      `ZEMAIL_TMPL_MAINT` — confirmado 2026-07-16, e-mail recebido. Caminho completo
+      `create_notification_service( )->send( )` validado de ponta a ponta (motor, `ZCL_LOGGER_BAL` com
+      `BAL_SUBOBJECT` já registado em SLG0, `ZIF_EMAIL_SENDER`, todos os 6 valores de `ZEMAIL_CONFIG`).
+- [x] `PLANO_REFACTOR_ZEMAIL.md` — secção "Estado actual": Fase 3 fechada, confirmação do utilizador
+      2026-07-16.
+- [x] Fase 4 (templates e manutenção) — já tinha arrancado e fechado antes deste gate ser fechado
+      formalmente (ordem de trabalho pedida pelo utilizador: "handle Fase 3 loose ends first"); sem
+      impacto, pois Fase 4 não dependia de nenhum destes itens em aberto.
