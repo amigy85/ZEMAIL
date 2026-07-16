@@ -149,15 +149,24 @@ CLASS zcl_assist_fi_poster IMPLEMENTATION.
     TRY.
         DATA(lv_documento) = next_document_number( cs_dado-data ).
 
+        " Parametros TABLES do CALL FUNCTION (interface classica) so
+        " aceitam uma variavel de tabela ja declarada — nao aceitam
+        " expressoes (chamadas de metodo) nem DATA(...) inline.
+        DATA(lt_gl)       = build_gl_line( cs_dado ).
+        DATA(lt_payable)  = build_payable_lines( cs_dado ).
+        DATA(lt_amounts)  = build_amounts( cs_dado ).
+        DATA(lt_ext)      = build_extension( ).
+        DATA lt_return TYPE STANDARD TABLE OF bapiret2.
+
         CALL FUNCTION 'BAPI_ACC_DOCUMENT_POST'
           EXPORTING
             documentheader = build_header( iv_documento = lv_documento is_dado = cs_dado )
           TABLES
-            accountgl      = build_gl_line( cs_dado )
-            accountpayable = build_payable_lines( cs_dado )
-            currencyamount = build_amounts( cs_dado )
-            extension2     = build_extension( )
-            return         = DATA(lt_return).
+            accountgl      = lt_gl
+            accountpayable = lt_payable
+            currencyamount = lt_amounts
+            extension2     = lt_ext
+            return         = lt_return.
 
         IF line_exists( lt_return[ type = 'E' ] ) OR line_exists( lt_return[ type = 'A' ] ).
           CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
