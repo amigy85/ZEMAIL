@@ -79,7 +79,9 @@
       `ZCL_TEMPLATE_ENGINE`, `ZCL_EMAIL_RENDERER`, `ZCL_EMAIL_SENDER_BCS`, `ZCL_NOTIFICATION_SERVICE`,
       `ZCL_EMAIL_FACTORY`) via abapGit (pacote `ZEMAIL`) e activou.
 - [x] Claude Code confirmou via MCP em 2026-07-14 que os 10 objectos existem, todos activos em `ZEMAIL`.
-- [ ] Utilizador corre ABAP Unit no CBD (T3.2/T3.3/T3.4 têm testes; T3.1/T3.5/T3.6/T3.7/T3.8 não, ver
+- [x] Utilizador correu ABAP Unit no CBD (T3.2/T3.3/T3.4) — todos verdes, confirmado 2026-07-16, depois
+      de corrigido `ZCL_PLACEHOLDER_SERVICE=>build_data_rows` (`WRITE ... TO` não aceita alvo `STRING`,
+      só C/N/D/T; substituído por string template). T3.1/T3.5/T3.6/T3.7/T3.8 não têm ABAP Unit (ver
       plano).
 - [ ] Utilizador reimporta/reactiva `ZEMAIL_TMPL_MAINT` (ver decisão 11 acima) e usa "Enviar teste" sobre
       a versão **activa** de `ZDEBIT_NOTE_HCB` — isto exercita `create_notification_service( )->send( )`
