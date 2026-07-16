@@ -14,7 +14,8 @@
 | 5.3 | `zif_assist_file_reader.intf.abap`, `zcl_file_reader_frontend.clas.abap`, `zcl_file_reader_server.clas.abap` | Leitura do CSV (frontend `GUI_UPLOAD` / servidor `OPEN DATASET`) | [x] escrito em Git |
 | 5.4 | `zcl_assist_validator.clas.abap` + `.testclasses.abap` | Validações (mesmas regras de `ZCL_MEDICAL_ASSIST_PROCESS->validar_dados`) | [x] escrito em Git |
 | 5.5 | `zcl_assist_fi_poster.clas.abap` | Lançamento FI via `BAPI_ACC_DOCUMENT_POST` + dedup `ZASSIST_RUN` | [x] escrito em Git |
-| 5.6 | `zcl_assist_notif_builder.clas.abap` + `.testclasses.abap` | Monta `it_values` e chama a fachada `ZEMAIL` (`ZDEBIT_NOTE_HCB`) | [ ] |
+| 5.6a | `zif_assist_run_repository.intf.abap` + `zcl_assist_run_repository_db.clas.abap` | Camada de dados injectável para `ZASSIST_RUN` (retrofit também em T5.5) | [x] escrito em Git |
+| 5.6 | `zcl_assist_notif_builder.clas.abap` + `.testclasses.abap` | Monta `it_values` e chama a fachada `ZEMAIL` (`ZDEBIT_NOTE_HCB`) | [x] escrito em Git |
 | 5.7 | `zcl_assist_medic_processor.clas.abap` | Orquestrador reader→validator→poster→notif_builder | [ ] |
 | 5.8 | `zrp_assist_medic.prog.abap` | Report de execução (frontend/servidor, modo teste, ALV de resultados) | [ ] |
 
@@ -37,9 +38,24 @@
 4. **T5.4 acrescenta os textos 020–025 à classe de mensagens `ZASSIST`** (`docs/msg/zassist_messages.md`)
    — usados via `MESSAGE eNNN(zassist) INTO`, não como `TEXT-ID` de excepção; criar em SE91 junto com
    001/010–013 (T5.2), antes de activar `ZCL_ASSIST_VALIDATOR`.
+5. **T5.6 descobriu uma lacuna real no `ZEMAIL`:** `ZCL_TEMPLATE_ENGINE->build` nunca reencaminha
+   `IV_WAERS` a `ZCL_PLACEHOLDER_SERVICE->replace`, pelo que `FORMAT=CURRENCY` (`ZIF_EMAIL_CONST=>
+   placeholder_format-currency`) está inutilizável de ponta-a-ponta via a fachada
+   (`create_notification_service( )->send( )`) — nenhum template real usa este formato hoje, por isso
+   nunca foi apanhado. `ZCL_ASSIST_NOTIF_BUILDER` contorna isto pré-formatando os valores como texto
+   simples (mesma técnica de `ZCL_DEBIT_NOTE_NOTIFICATION`). **Não corrigido** — fica registado para uma
+   eventual limpeza futura do framework `ZEMAIL` (fora do âmbito desta fase).
+6. **T5.6 introduziu `ZIF_ASSIST_RUN_REPOSITORY`** (não prevista no plano original) para poder testar
+   `ZCL_ASSIST_NOTIF_BUILDER` sem tocar `ZASSIST_RUN` real — mesmo raciocínio da `ZIF_TEMPLATE_REPOSITORY`
+   em `ZEMAIL` (T3.2). `ZCL_ASSIST_FI_POSTER` (T5.5) foi retroactivamente ajustada para usar a mesma
+   interface em vez de `SELECT`/`INSERT` directos — **reimportar/reactivar `ZCL_ASSIST_FI_POSTER`** (o
+   construtor mudou: agora recebe `IO_RUN_REPOSITORY`).
 
 ## Confirmação e fecho do gate
 
+- [ ] Confirmar em PFCG/SU21 os campos reais de `P_ORGIN` (`INFTY`/`SUBTY`/`PERSA`/`PERSG`/`PERSK`/
+      `VDSK1`/`ACTVT`) usados em `ZCL_ASSIST_NOTIF_BUILDER->send_notifications` — não confirmáveis via
+      MCP (sem ferramenta para objectos de autorização); baseados em conhecimento SAP HR padrão.
 - [ ] Utilizador cria `ZASSIST_RUN`, `ZASSIST_S_REGISTO`, `ZASSIST_T_REGISTO` em SE11 (secção 5.1).
 - [ ] Utilizador cria a classe de mensagens `ZASSIST` em SE91 (T5.2).
 - [ ] Utilizador importa/activa os objectos `src/zassist/` via abapGit (pacote `ZASSIST`).

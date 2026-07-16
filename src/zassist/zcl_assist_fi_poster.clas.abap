@@ -5,6 +5,13 @@ CLASS zcl_assist_fi_poster DEFINITION
 
   PUBLIC SECTION.
 
+    " IO_RUN_REPOSITORY injectado (ZIF_ASSIST_RUN_REPOSITORY, T5.6) — a
+    " mesma razao da ZIF_TEMPLATE_REPOSITORY em ZEMAIL (T3.2): permite
+    " testar esta classe com um duplo, sem tocar na BD real.
+    METHODS constructor
+      IMPORTING
+        io_run_repository TYPE REF TO zif_assist_run_repository.
+
     " Lanca um documento FI por registo valido e ainda nao lancado de
     " CT_DADOS — mesmo mapeamento de BAPI_ACC_DOCUMENT_POST de
     " ZCL_MEDICAL_ASSIST_PROCESS->carregar_lancamentos (lido via MCP).
@@ -19,6 +26,8 @@ CLASS zcl_assist_fi_poster DEFINITION
         ct_dados TYPE zassist_t_registo.
 
   PRIVATE SECTION.
+
+    DATA mo_run_repository TYPE REF TO zif_assist_run_repository.
 
     TYPES:
       tt_accountgl      TYPE STANDARD TABLE OF bapiacgl09 WITH DEFAULT KEY,
@@ -43,13 +52,6 @@ CLASS zcl_assist_fi_poster DEFINITION
     METHODS post_registo
       CHANGING
         cs_dado TYPE zassist_s_registo.
-
-    METHODS already_processed
-      IMPORTING
-        iv_referencia TYPE zassist_referencia
-        iv_pernr      TYPE pernr_d
-      RETURNING
-        VALUE(rs_run) TYPE zassist_run.
 
     METHODS next_document_number
       IMPORTING
@@ -111,6 +113,10 @@ ENDCLASS.
 
 CLASS zcl_assist_fi_poster IMPLEMENTATION.
 
+  METHOD constructor.
+    mo_run_repository = io_run_repository.
+  ENDMETHOD.
+
   METHOD post.
     LOOP AT ct_dados ASSIGNING FIELD-SYMBOL(<ls_dado>)
       WHERE is_valid = abap_true AND is_posted = abap_false.
@@ -120,7 +126,7 @@ CLASS zcl_assist_fi_poster IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD post_registo.
-    DATA(ls_run) = already_processed(
+    DATA(ls_run) = mo_run_repository->find(
       iv_referencia = cs_dado-referencia
       iv_pernr      = cs_dado-pernr ).
 
@@ -167,13 +173,13 @@ CLASS zcl_assist_fi_poster IMPLEMENTATION.
         DATA lv_timestamp TYPE zassist_run-created_at.
         GET TIME STAMP FIELD lv_timestamp.
 
-        INSERT zassist_run FROM VALUE zassist_run(
+        mo_run_repository->insert( VALUE zassist_run(
           referencia = cs_dado-referencia
           pernr      = cs_dado-pernr
           belnr      = lv_documento
           bukrs      = cs_dado-bukrs
           gjahr      = year_from_csv_date( cs_dado-data )
-          created_at = lv_timestamp ).
+          created_at = lv_timestamp ) ).
 
         CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
           EXPORTING
@@ -186,13 +192,6 @@ CLASS zcl_assist_fi_poster IMPLEMENTATION.
         CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
         cs_dado-message = |Erro inesperado ao lançar documento FI: { lx_error->get_text( ) }|.
     ENDTRY.
-  ENDMETHOD.
-
-  METHOD already_processed.
-    SELECT SINGLE * FROM zassist_run
-      WHERE referencia = @iv_referencia
-        AND pernr      = @iv_pernr
-      INTO @rs_run.
   ENDMETHOD.
 
   METHOD next_document_number.
