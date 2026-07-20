@@ -138,6 +138,13 @@ CLASS zcl_assist_medic_processor IMPLEMENTATION.
       ELSE lt_dados ).
 
     DATA(lt_email_results) = mo_notif_builder->send_notifications( lt_para_notificar ).
+
+    " COMMIT WORK e proibido dentro das classes do framework ZEMAIL
+    " (responsabilidade do chamador, CLAUDE.md) — sem isto, a entrada do
+    " pedido de envio BCS (fila SOST/SCOT) nunca fica persistida,
+    " exigindo reprocessamento manual (mensagem SO672).
+    COMMIT WORK.
+
     DATA(lv_enviados) = 0.
     LOOP AT lt_email_results TRANSPORTING NO FIELDS WHERE status = zif_email_const=>send_status-success.
       lv_enviados = lv_enviados + 1.

@@ -66,7 +66,11 @@ CLASS zcl_email_sender_bcs IMPLEMENTATION.
           WHEN is_message-sender IS NOT INITIAL THEN is_message-sender ELSE mv_sender_address ).
         lo_request->set_sender( cl_cam_address_bcs=>create_internet_address( lv_sender ) ).
 
-        lo_request->set_send_immediately( abap_false ).
+        " ZCL_EMAIL_SERVICE (legado, lido via MCP) nunca chama
+        " SET_SEND_IMMEDIATELY, deixando o BCS usar o seu proprio omissao
+        " (envio imediato) — SET_SEND_IMMEDIATELY( abap_false ) aqui forcava
+        " sempre a fila SOST/SCOT, exigindo reprocessamento manual
+        " (mensagem SO672); alinhado com o legado.
         lo_request->send( i_with_error_screen = abap_false ).
 
         rv_send_id = lo_request->oid( ).
