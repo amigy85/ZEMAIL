@@ -17,10 +17,14 @@ INTERFACE zif_email_const
     END OF recipient_type,
 
     " Formatos de placeholder (ZEMAIL_S_PLACEHOLDER-FORMAT)
+    " HTML: valor ja e HTML construido (ex.: linhas <tr>...</tr>) — nunca
+    " escapado, ao contrario de PLAIN/DATE/CURRENCY (texto de negocio,
+    " sempre escapado por omissao contra injeccao de HTML).
     BEGIN OF placeholder_format,
       plain    TYPE zemail_placeholder_format VALUE ' ',
       date     TYPE zemail_placeholder_format VALUE 'D',
       currency TYPE zemail_placeholder_format VALUE 'C',
+      html     TYPE zemail_placeholder_format VALUE 'H',
     END OF placeholder_format,
 
     " Estados de envio (ZEMAIL_S_SEND_RESULT-STATUS)

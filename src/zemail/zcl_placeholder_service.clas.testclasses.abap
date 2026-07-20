@@ -9,6 +9,7 @@ CLASS ltc_placeholder_service DEFINITION FOR TESTING
     METHODS setup.
     METHODS escalar               FOR TESTING RAISING cx_static_check.
     METHODS escape_html           FOR TESTING RAISING cx_static_check.
+    METHODS formato_html_nao_escapa FOR TESTING RAISING cx_static_check.
     METHODS formato_data          FOR TESTING RAISING cx_static_check.
     METHODS formato_moeda         FOR TESTING RAISING cx_static_check.
     METHODS tabela_por_rtti       FOR TESTING RAISING cx_static_check.
@@ -40,6 +41,15 @@ CLASS ltc_placeholder_service IMPLEMENTATION.
     DATA(lv_html) = mo_cut->replace( iv_html = `{{NOME}}` it_values = lt_values ).
 
     cl_abap_unit_assert=>assert_true( xsdbool( lv_html NS '<script>' ) ).
+  ENDMETHOD.
+
+  METHOD formato_html_nao_escapa.
+    DATA(lt_values) = VALUE zemail_t_placeholder(
+      ( name = 'LINHAS' value = '<tr><td>Consulta</td></tr>' format = zif_email_const=>placeholder_format-html ) ).
+
+    DATA(lv_html) = mo_cut->replace( iv_html = `<table>{{LINHAS}}</table>` it_values = lt_values ).
+
+    cl_abap_unit_assert=>assert_true( xsdbool( lv_html CS '<tr><td>Consulta</td></tr>' ) ).
   ENDMETHOD.
 
   METHOD formato_data.

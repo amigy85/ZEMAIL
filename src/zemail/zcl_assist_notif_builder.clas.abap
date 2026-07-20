@@ -282,7 +282,7 @@ CLASS zcl_assist_notif_builder IMPLEMENTATION.
       ( name = 'DATA'         value = format_date( is_employee-data_doc )
         format = zif_email_const=>placeholder_format-plain )
       ( name = 'TABLE_ROWS'   value = build_table_rows( it_lines = is_employee-lines iv_currency = is_employee-waers )
-        format = zif_email_const=>placeholder_format-plain )
+        format = zif_email_const=>placeholder_format-html )
       ( name = 'TOTAL_VALOR'  value = format_amount( iv_amount = is_employee-total_valor  iv_currency = is_employee-waers )
         format = zif_email_const=>placeholder_format-plain )
       ( name = 'TOTAL_DEBITO' value = format_amount( iv_amount = is_employee-total_debito iv_currency = is_employee-waers )

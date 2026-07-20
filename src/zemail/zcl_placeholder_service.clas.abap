@@ -150,9 +150,13 @@ CLASS zcl_placeholder_service IMPLEMENTATION.
                                                                  iv_waers  = iv_waers )
       ELSE is_value-value ).
 
-    rv_text = COND #( WHEN iv_escape_html = abap_true
-                       THEN escape( val = lv_text format = cl_abap_format=>e_html_text )
-                       ELSE lv_text ).
+    " FORMAT=HTML nunca e escapado, mesmo com IV_ESCAPE_HTML = abap_true —
+    " para valores que sao deliberadamente marcado HTML ja construido
+    " (ex.: linhas <tr> de uma tabela), nao texto de negocio a proteger.
+    rv_text = COND #(
+      WHEN is_value-format = zif_email_const=>placeholder_format-html THEN lv_text
+      WHEN iv_escape_html = abap_true THEN escape( val = lv_text format = cl_abap_format=>e_html_text )
+      ELSE lv_text ).
   ENDMETHOD.
 
   METHOD format_date.

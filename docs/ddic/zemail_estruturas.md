@@ -39,6 +39,13 @@ table types de outras estruturas:
    - `' '` (espaço) — texto simples, sem formatação
    - `D` — data (conversão DDMMYYYY → formato do utilizador, regra em `ZCL_PLACEHOLDER_SERVICE`, T3.3)
    - `C` — moeda (formatação por `WAERS`, regra em `ZCL_PLACEHOLDER_SERVICE`, T3.3)
+   - `H` — **acrescentado em T5.6 (2026-07-20), fora do âmbito original de T1.4:** valor já é HTML
+     construído (ex.: linhas `<tr>...</tr>` de uma tabela) — nunca escapado por
+     `ZCL_PLACEHOLDER_SERVICE->format_value`, ao contrário dos restantes formatos. Descoberto porque
+     `{{TABLE_ROWS}}` (`ZCL_ASSIST_NOTIF_BUILDER`) estava a sair escapado no e-mail real (`<tr>` visível
+     como texto em vez de renderizado) — `iv_escape_html` do `replace()` era tudo-ou-nada, sem controlo
+     por valor individual. **Acrescentar este valor fixo em SE11** (não bloqueia a funcionalidade — o
+     código já funciona sem a alteração de domínio, só a documentação/F4 ficam incompletos sem ela).
 
    Elemento de dados homónimo, rótulo "Formato Placeholder".
 4. **`ZEMAIL_ESTADO_ENVIO`** — domínio `CHAR(1)`, **valores fixos**: `S` (Sucesso), `E` (Erro) — mesma
