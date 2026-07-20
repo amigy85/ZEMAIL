@@ -80,9 +80,9 @@ agora está correcto.
 
 ## Confirmação e fecho do gate
 
-- [ ] Confirmar em PFCG/SU21 os campos reais de `P_ORGIN` (`INFTY`/`SUBTY`/`PERSA`/`PERSG`/`PERSK`/
-      `VDSK1`/`ACTVT`) usados em `ZCL_ASSIST_NOTIF_BUILDER->send_notifications` — não confirmáveis via
-      MCP (sem ferramenta para objectos de autorização); baseados em conhecimento SAP HR padrão.
+- [x] Campos de `P_ORGIN` corrigidos pelo utilizador directamente no CBD (2026-07-20), depois de
+      verificação real em PFCG/SU21: `ACTVT` removido, `AUTHC` acrescentado. Lista final: `INFTY`/
+      `SUBTY`/`AUTHC`/`PERSA`/`PERSG`/`PERSK`/`VDSK1`. Alteração espelhada em Git.
 - [x] `ZASSIST_RUN`, `ZASSIST_S_REGISTO`, `ZASSIST_T_REGISTO` criados em SE11 (pacote `ZEMAIL`).
 - [x] Classe de mensagens `ZASSIST` criada em SE91 (pacote `ZEMAIL`) — **confirmar que inclui os textos
       020–025 de T5.4**, além de 001/010–013 (T5.2).

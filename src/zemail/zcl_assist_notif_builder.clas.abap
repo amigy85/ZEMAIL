@@ -159,14 +159,17 @@ CLASS zcl_assist_notif_builder IMPLEMENTATION.
   METHOD send_notifications.
     DATA(lt_employees) = build_employee_map( it_dados ).
 
+    " Campos AUTHC/ACTVT ajustados no CBD (2026-07-20) apos verificacao real
+    " em PFCG/SU21 — ACTVT removido, AUTHC acrescentado (nao confirmavel via
+    " MCP, sem ferramenta para objectos de autorizacao; ver CLAUDE.md).
     AUTHORITY-CHECK OBJECT 'P_ORGIN'
       ID 'INFTY' FIELD '0105'
       ID 'SUBTY' FIELD mv_pa0105_subtype
+      ID 'AUTHC' FIELD '*'
       ID 'PERSA' FIELD '*'
       ID 'PERSG' FIELD '*'
       ID 'PERSK' FIELD '*'
-      ID 'VDSK1' FIELD '*'
-      ID 'ACTVT' FIELD '03'.
+      ID 'VDSK1' FIELD '*'.
 
     CHECK sy-subrc = 0.
 

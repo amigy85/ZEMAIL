@@ -82,6 +82,10 @@ CLASS lcl_report DEFINITION.
       IMPORTING
         it_result TYPE zcl_assist_medic_processor=>tt_result.
 
+    METHODS format_columns
+      IMPORTING
+        io_columns TYPE REF TO cl_salv_columns_table.
+
     " ICON_LED_RED/YELLOW/GREEN — constantes standard do grupo de tipos
     " ICON, largamente usadas em semaforos ALV; nao confirmadas via MCP
     " nesta tarefa (falha de ligacao na consulta à tabela ICON) — a
@@ -158,11 +162,35 @@ CLASS lcl_report IMPLEMENTATION.
         " CL_SALV_COLUMN_LIST, superclasse de CL_SALV_COLUMN_TABLE).
         DATA(lo_column) = CAST cl_salv_column_table( lo_alv->get_columns( )->get_column( 'SEMAFORO' ) ).
         lo_column->set_icon( abap_true ).
+        lo_column->set_short_text( ' ' ).
+        lo_column->set_medium_text( ' ' ).
       CATCH cx_salv_not_found.
     ENDTRY.
 
+    format_columns( lo_alv->get_columns( ) ).
+
     lo_alv->get_functions( )->set_all( abap_true ).
     lo_alv->display( ).
+  ENDMETHOD.
+
+  METHOD format_columns.
+    " STATUS/MENSAGEM sao STRING simples (sem elemento de dados) — sem
+    " rotulo explicito, o SALV mostraria o nome tecnico do campo em vez
+    " de um cabecalho legivel. BELNR (ZASSIST_DOCUMENTO) tem elemento de
+    " dados mas sem rotulos de campo preenchidos em SE11 — definido aqui
+    " tambem, para nao depender disso.
+    io_columns->set_optimize( abap_true ).
+
+    TRY.
+        io_columns->get_column( 'PERNR' )->set_medium_text( 'Nº Pessoal' ).
+        io_columns->get_column( 'NOME' )->set_medium_text( 'Nome' ).
+        io_columns->get_column( 'BELNR' )->set_medium_text( 'Documento FI' ).
+        io_columns->get_column( 'EMAIL' )->set_medium_text( 'E-mail' ).
+        io_columns->get_column( 'STATUS' )->set_medium_text( 'Estado' ).
+        io_columns->get_column( 'MENSAGEM' )->set_medium_text( 'Mensagem' ).
+        io_columns->get_column( 'MENSAGEM' )->set_long_text( 'Mensagem / Detalhe' ).
+      CATCH cx_salv_not_found.
+    ENDTRY.
   ENDMETHOD.
 
   METHOD status_icon.
