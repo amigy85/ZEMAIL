@@ -8,8 +8,13 @@ CLASS zcl_email_factory DEFINITION
     " Composição por omissão do framework ZEMAIL: provider DB + serviço de
     " placeholders + engine + renderer + emissor BCS + logger BAL, ligados
     " pelos parâmetros de ZEMAIL_CONFIG. Único ponto do framework que lê
-    " ZEMAIL_CONFIG (regra "composição só na factory").
+    " ZEMAIL_CONFIG (regra "composição só na factory"). IT_IMAGES (imagens
+    " inline por content-id, T3.5) é decidido por quem compõe o serviço
+    " (ex.: ZCL_ASSIST_MEDIC_PROCESSOR), não fixo aqui — omitido por omissão
+    " (sem imagens) para não obrigar todos os chamadores a fornecer algo.
     CLASS-METHODS create_notification_service
+      IMPORTING
+        it_images      TYPE zcl_email_renderer=>tt_image_map OPTIONAL
       RETURNING
         VALUE(ri_service) TYPE REF TO zif_email_service.
 
@@ -78,7 +83,8 @@ CLASS zcl_email_factory IMPLEMENTATION.
       io_engine   = lo_engine
       io_renderer = lo_renderer
       io_sender   = lo_sender
-      io_logger   = lo_logger ).
+      io_logger   = lo_logger
+      it_images   = it_images ).
   ENDMETHOD.
 
   METHOD create_sender.

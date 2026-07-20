@@ -46,6 +46,12 @@ CLASS zcl_assist_medic_processor DEFINITION
     CONSTANTS c_bal_object    TYPE balobj_d  VALUE 'ZDEBIT_NOTE'.
     CONSTANTS c_bal_subobject TYPE balsubobj VALUE 'FI_POST'.
 
+    " Logo HCB embutido inline via CID (T3.5/T3.6, ZCL_EMAIL_RENDERER/
+    " ZCL_EMAIL_SENDER_BCS) — caminho no MIME Repository carregado
+    " manualmente pelo utilizador via SE80 (Claude Code nao escreve no SAP).
+    CONSTANTS c_logo_content_id TYPE zemail_content_id VALUE 'logo_hcb'.
+    CONSTANTS c_logo_mime_path  TYPE string VALUE '/SAP/PUBLIC/ZHCB/logo_hcb.png'.
+
     DATA mo_reader        TYPE REF TO zif_assist_file_reader.
     DATA mo_validator      TYPE REF TO zcl_assist_validator.
     DATA mo_poster         TYPE REF TO zcl_assist_fi_poster.
@@ -96,7 +102,8 @@ CLASS zcl_assist_medic_processor IMPLEMENTATION.
     mo_poster = NEW zcl_assist_fi_poster( io_run_repository = lo_run_repository ).
 
     mo_notif_builder = NEW zcl_assist_notif_builder(
-      io_email_service  = zcl_email_factory=>create_notification_service( )
+      io_email_service  = zcl_email_factory=>create_notification_service(
+        it_images = VALUE #( ( content_id = c_logo_content_id mime_path = c_logo_mime_path ) ) )
       io_run_repository = lo_run_repository
       iv_pa0105_subtype = read_pa0105_subtype( ) ).
 
